@@ -1,0 +1,38 @@
+{
+  "name": "discord-cas",
+  "version": "1.0.0",
+  "description": "A public Discord Bot, made for interfacing with a Central Authentication Service rotocol",
+  "main": "index.js",
+  "scripts": {
+    "start": "ts-node src/index.ts",
+    "start:dev": "ts-node-dev src/index.ts",
+    "start:prod": "node dist/index.js",
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NaNoMelo/Discord-CAS.git"
+  },
+  "keywords": [
+    "Discord-Bot"
+  ],
+  "author": "NaNo",
+  "license": "SEE LICENSE IN ./LICENCE",
+  "bugs": {
+    "url": "https://github.com/NaNoMelo/Discord-CAS/issues"
+  },
+  "homepage": "https://github.com/NaNoMelo/Discord-CAS#readme",
+  "dependencies": {
+    "discord.js": "^13.8.0",
+    "dotenv": "^16.0.1",
+    "glob": "^8.0.3"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.2.0",
+    "@types/node": "^17.0.42",
+    "ts-node": "^10.8.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^4.7.3"
+  }
+}
