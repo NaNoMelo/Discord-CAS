@@ -5,7 +5,6 @@ import {
 	Interaction
 } from "discord.js"
 import { client } from ".."
-import { Command } from "../structures/Command"
 import { Event } from "../structures/Events"
 import { ExtendedInteraction } from "../typings/Command"
 import { ExtendedClient } from "../structures/Client"

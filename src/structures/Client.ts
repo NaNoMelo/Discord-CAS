@@ -14,7 +14,7 @@ import path from "path"
 const globPromise = promisify(glob)
 
 export class ExtendedClient extends Client {
-	commands: Collection<string, CommandType> = new Collection()
+	commands: Collection<string, CommandType>
 
 	constructor() {
 		super({ intents: 65535 })

@@ -4,6 +4,8 @@ declare global {
 			botToken: string
 			guildId: string
 			environement: "dev" | "prod" | "debug"
+			mailUser: string
+			mailPass: string
 		}
 	}
 }
