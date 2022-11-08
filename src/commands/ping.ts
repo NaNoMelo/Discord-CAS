@@ -1,6 +1,6 @@
 import { CommandInteractionOptionResolver, Interaction } from "discord.js"
 import { ExtendedInteraction } from "../typings/Command"
-import { ExtendedClient } from "../structures/Client"
+import { ExtendedClient } from "../classes/Client"
 
 module.exports = {
 	data: {

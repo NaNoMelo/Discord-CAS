@@ -35,6 +35,9 @@ export class ExtendedClient extends Client {
 			this.guilds.cache.get(guildID)?.commands.set(slashCommands)
 			console.log(`Registering commands to ${guildID}`)
 		} else {
+			this.guilds.cache.forEach((guild) => {
+				guild.commands.set([])
+			})
 			this.application?.commands.set(slashCommands)
 			console.log("Registering global commands")
 		}
