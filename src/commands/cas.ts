@@ -1,73 +1,16 @@
 import {
 	CommandInteractionOptionResolver,
-	Interaction,
-	Options,
 	CommandInteractionOption
 } from "discord.js"
 import { ExtendedInteraction } from "../typings/Command"
 import { ExtendedClient } from "../classes/Client"
-const nodemailer = require("nodemailer")
-import { mailer } from ".."
-import { randomInt } from "crypto"
-
-class Profile {
-	mail: String
-	discordID: String
-	promo: Number | null
-	authCode: String | null
-	firstName: String
-	lastName: String
-	authed: Boolean
-
-	constructor(mail: String, discordID: String) {
-		this.mail = mail
-		this.discordID = discordID
-		this.promo = null
-		this.authCode = null
-		let splitMail = mail.split(/.@/g)
-		this.firstName = splitMail[0]
-		this.lastName = splitMail[1]
-		this.authed = false
-	}
-
-	async genAuthCode() {
-		let numbers = "0123456789"
-		this.authCode = ""
-		for (let i = 0; i < 6; i++) {
-			this.authCode += numbers[randomInt(0, 10)]
-		}
-		setTimeout(() => {
-			this.authCode = null
-		}, 300000)
-	}
-
-	async sendAuthMail() {
-		await this.genAuthCode()
-		if (this.authCode) {
-			let info = await mailer.sendMail(new Mail(this.mail, this.authCode))
-			return info
-		}
-	}
-}
-
-class Mail {
-	from: String
-	to: String
-	subject: String
-	text: String
-
-	constructor(toAdress: String, token: String) {
-		this.from = `"Discord CAS" <${process.env.mailUser}>`
-		this.to = toAdress
-		this.subject = "Discord mail authentication"
-		this.text = `hello world ! ${token}`
-	}
-}
+import { Profile } from "../classes/Profile"
+import fs from "fs"
 
 module.exports = {
 	data: {
 		name: "cas",
-		description: "begins authentication",
+		description: "Commence l'authentification",
 		options: [
 			{
 				name: "mail",
@@ -82,7 +25,7 @@ module.exports = {
 		_client: ExtendedClient,
 		interaction: ExtendedInteraction
 	) {
-		let mailArg = arg.data.find(function (data: CommandInteractionOption) {
+		let mailArg = arg.data.find((data: CommandInteractionOption) => {
 			return data.name == "mail"
 		})
 		if (!mailArg?.value) {
@@ -101,8 +44,17 @@ module.exports = {
 			)
 			return 1
 		}
-		let user = new Profile(mailArg.value.toString(), interaction.user.id)
+		let user = await Profile.get(interaction.user.id)
+		if (!user) {
+			user = new Profile(mailArg.value.toString(), interaction.user.id)
+		}
+		if (user.authed) {
+			interaction.followUp("Vous avez déjà été authentifié")
+			return
+		}
 		user.sendAuthMail()
-		interaction.followUp(":+1:")
+
+		user.save()
+		interaction.followUp("Un mail d'authentification vous a été envoyé")
 	}
 }
