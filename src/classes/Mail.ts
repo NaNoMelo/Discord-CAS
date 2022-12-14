@@ -1,3 +1,6 @@
+import { createTransport } from "nodemailer"
+import { decrypt } from "./Crypto"
+
 export class Mail {
 	from: String
 	to: String
@@ -11,3 +14,13 @@ export class Mail {
 		this.text = `hello world ! ${token}`
 	}
 }
+
+export let mailer = createTransport({
+	host: "smtp.utbm.fr",
+	port: 465,
+	secure: true,
+	auth: {
+		user: process.env.mailUser,
+		pass: decrypt(process.env.mailPass as string)
+	}
+})

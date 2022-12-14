@@ -4,6 +4,7 @@ import {
 } from "discord.js"
 import { ExtendedClient } from "../classes/Client"
 import { Profile } from "../classes/Profile"
+import { Settings } from "../classes/Settings"
 import { ExtendedInteraction } from "../typings/Command"
 
 module.exports = {
@@ -25,18 +26,9 @@ module.exports = {
 		_client: ExtendedClient,
 		interaction: ExtendedInteraction
 	) {
-		let codeArg = arg.data.find((data: CommandInteractionOption) => {
-			return data.name == "code"
-		})
-		if (!codeArg?.value) {
-			interaction.followUp(
-				"Une erreur a eu lieu, merci de réessayer ulterieurement.\n *si l'erreur persiste, merci de le signaler à un modérateur*"
-			)
-			return 1
-		}
-		let code = codeArg.value
+		await interaction.deferReply()
 		let user = await Profile.get(interaction.user.id)
-		console.log(user)
+		let settings = await Settings.get(interaction.guildId)
 		if (!user) {
 			interaction.followUp(
 				"Merci de commencer l'authentification avec la commande /cas"
@@ -44,9 +36,16 @@ module.exports = {
 			return
 		}
 
-		if (user.authCode == code) {
+		if (user.authCode == arg.getString("code", true)) {
 			user.authed = true
-			user.save()
+			if (interaction.guild) {
+				let role = interaction.guild.roles.cache.find(
+					(r) => r.id == settings.verifiedRole
+				)
+				if (role) interaction.member.roles.add(role)
+				interaction.member.setNickname(user.firstName)
+			}
+			await user.save()
 			interaction.followUp("Vous avez bien été authentifié !")
 		} else {
 			interaction.followUp(

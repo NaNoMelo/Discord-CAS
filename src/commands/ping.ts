@@ -12,6 +12,7 @@ module.exports = {
 		_client: ExtendedClient,
 		interaction: ExtendedInteraction
 	) {
+		await interaction.deferReply()
 		interaction.followUp("pong")
 	}
 }

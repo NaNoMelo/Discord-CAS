@@ -1,22 +1,9 @@
 import { CommandInteractionOptionResolver, Interaction } from "discord.js"
 import { ExtendedInteraction } from "../typings/Command"
 import { ExtendedClient } from "../classes/Client"
-const nodemailer = require("nodemailer")
-import { mailer } from ".."
-
-class Mail {
-	from: String
-	to: String
-	subject: String
-	text: string
-
-	constructor(toAdress: string, token: string) {
-		this.from = `"Discord CAS" <${process.env.mailUser}>`
-		this.to = toAdress
-		this.subject = "Discord mail authentication"
-		this.text = `hello world ! ${token}`
-	}
-}
+import { mailer } from "../classes/Mail"
+import { Mail } from "../classes/Mail"
+import { SendMailOptions } from "nodemailer"
 
 module.exports = {
 	data: {
@@ -28,11 +15,11 @@ module.exports = {
 		_client: ExtendedClient,
 		interaction: ExtendedInteraction
 	) {
+		await interaction.deferReply()
 		let info = await mailer.sendMail(
-			new Mail("nathan.lamey@outlook.fr", "123456")
+			new Mail("nathan.lamey@outlook.fr", "123456") as SendMailOptions
 		)
 		console.log(info)
 		interaction.followUp("mail sent !")
-		//console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info))
 	}
 }

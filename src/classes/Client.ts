@@ -30,15 +30,23 @@ export class ExtendedClient extends Client {
 		slashCommands,
 		guildID
 	}: RegisterCommandsOptions) {
-		await this.application?.commands.set([])
 		if (guildID) {
-			this.guilds.cache.get(guildID)?.commands.set(slashCommands)
+			this.guilds.cache
+				.get(guildID)
+				?.commands.set(slashCommands)
+				.then(() =>
+					console.log(`Successfuly registered commands to ${guildID}`)
+				)
 			console.log(`Registering commands to ${guildID}`)
 		} else {
 			this.guilds.cache.forEach((guild) => {
 				guild.commands.set([])
 			})
-			this.application?.commands.set(slashCommands)
+			this.application?.commands
+				.set(slashCommands)
+				.then(() =>
+					console.log("Successfuly registered global commands")
+				)
 			console.log("Registering global commands")
 		}
 	}
@@ -55,15 +63,14 @@ export class ExtendedClient extends Client {
 		console.log("commandes :", commandFiles)
 
 		for (const file of commandFiles) {
-			const command = require(file)
+			const command = require(file) as CommandType
 			slashCommands.push(command.data)
 			this.commands.set(command.data.name, command)
 		}
 
 		this.on("ready", () => {
 			this.registerCommands({
-				slashCommands: slashCommands,
-				guildID: process.env.guildId
+				slashCommands: slashCommands
 			})
 		})
 

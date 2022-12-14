@@ -1,9 +1,8 @@
 import {
-	ChatInputApplicationCommandData,
+	ApplicationCommandDataResolvable,
 	CommandInteraction,
 	CommandInteractionOptionResolver,
-	GuildMember,
-	PermissionResolvable
+	GuildMember
 } from "discord.js"
 
 import { ExtendedClient } from "../classes/Client"
@@ -18,7 +17,7 @@ type RunFunction = (
 	interaction: ExtendedInteraction
 ) => any
 
-export type CommandType = {
-	userPermissions?: PermissionResolvable[]
+export interface CommandType {
+	data: ApplicationCommandDataResolvable
 	run: RunFunction
-} & ChatInputApplicationCommandData
+}

@@ -104,4 +104,8 @@ dist
 .tern-port
 
 # Data 
-src/data/*
+src/data/
+src/configs/
+
+# Prettier config
+.prettierrc
