@@ -1,7 +1,4 @@
-import {
-	CommandInteractionOption,
-	CommandInteractionOptionResolver
-} from "discord.js"
+import { CommandInteractionOptionResolver } from "discord.js"
 import { ExtendedClient } from "../classes/Client"
 import { Profile } from "../classes/Profile"
 import { Settings } from "../classes/Settings"
@@ -28,7 +25,8 @@ module.exports = {
 	) {
 		await interaction.deferReply()
 		let user = await Profile.get(interaction.user.id)
-		let settings = await Settings.get(interaction.guildId)
+		let settings = await Settings.get(interaction.guildId as string)
+
 		if (!user) {
 			interaction.followUp(
 				"Merci de commencer l'authentification avec la commande /cas"
@@ -43,7 +41,11 @@ module.exports = {
 					(r) => r.id == settings.verifiedRole
 				)
 				if (role) interaction.member.roles.add(role)
-				interaction.member.setNickname(user.firstName)
+				if (settings.nicknameFormat) {
+					interaction.member.setNickname(
+						settings.nicknameFormat(user)
+					)
+				}
 			}
 			await user.save()
 			interaction.followUp("Vous avez bien été authentifié !")

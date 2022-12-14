@@ -1,5 +1,6 @@
 import {
 	ApplicationCommandDataResolvable,
+	AutocompleteInteraction,
 	CommandInteraction,
 	CommandInteractionOptionResolver,
 	GuildMember
@@ -17,7 +18,14 @@ type RunFunction = (
 	interaction: ExtendedInteraction
 ) => any
 
+type AutocompleteFunction = (
+	args: CommandInteractionOptionResolver,
+	client: ExtendedClient,
+	interaction: AutocompleteInteraction
+) => any
+
 export interface CommandType {
 	data: ApplicationCommandDataResolvable
 	run: RunFunction
+	autocomplete?: AutocompleteFunction
 }

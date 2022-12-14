@@ -5,18 +5,20 @@ import fs from "fs"
 import { readFile } from "node:fs/promises"
 import { SendMailOptions } from "nodemailer"
 import { decrypt, encrypt } from "./Crypto"
+import { Collection } from "discord.js"
 
 export class Profile {
-	mail: String
-	discordID: String
+	mail: string
+	discordID: string
 	promo: Number | null
-	authCode: String | null
+	authCode: string | null
 	authCodeCreationDate: number | null
-	firstName: String
-	lastName: String
+	firstName: string
+	lastName: string
+	nickname: string | null
 	authed: Boolean
 
-	constructor(mail: String, discordID: String) {
+	constructor(mail: string, discordID: string) {
 		this.mail = mail
 		this.discordID = discordID
 		this.promo = null
@@ -30,6 +32,7 @@ export class Profile {
 			.toLowerCase()
 		this.lastName =
 			this.lastName.charAt(0).toUpperCase() + this.lastName.slice(1)
+		this.nickname = null
 		this.authed = false
 	}
 
@@ -101,5 +104,25 @@ export class Profile {
 			)
 			return info
 		}
+	}
+
+	public getNickname(nicknameFormat: string) {
+		let replacements = new Collection<string, string>()
+		replacements.set("firstname", this.firstName)
+		replacements.set("lastname", this.lastName)
+		replacements.set("nickname", this.nickname || "")
+		replacements.set("promo", this.promo?.toString() || "")
+		if (nicknameFormat)
+			return nicknameFormat.replace(
+				/{(\w+)}/g,
+				(match, placeholder: string) => {
+					let replacement = replacements.get(placeholder)
+					if (replacement) {
+						return replacement
+					} else {
+						return match
+					}
+				}
+			)
 	}
 }

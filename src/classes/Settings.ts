@@ -4,13 +4,15 @@ import { readFile } from "node:fs/promises"
 export class Settings {
 	guildID: String
 	verifiedRole: String
+	nicknameFormat: String | null
 
 	constructor(guildID: String) {
 		this.guildID = guildID
 		this.verifiedRole = ""
+		this.nicknameFormat = null
 	}
 
-	static async get(guildID: String | null) {
+	static async get(guildID: String) {
 		if (fs.existsSync(`${__dirname}/../configs/${guildID}.json`)) {
 			let settings = JSON.parse(
 				await readFile(`${__dirname}/../configs/${guildID}.json`, {

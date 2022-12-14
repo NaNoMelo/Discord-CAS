@@ -3,6 +3,7 @@ import {
 	CommandInteractionOptionResolver
 } from "discord.js"
 import { ExtendedClient } from "../classes/Client"
+import { Profile } from "../classes/Profile"
 import { Settings } from "../classes/Settings"
 import { ExtendedInteraction } from "../typings/Command"
 
@@ -12,7 +13,8 @@ const data: ApplicationCommandDataResolvable = {
 	options: [
 		{
 			name: "role",
-			description: "Option que vous shouaitez paramètrer",
+			description:
+				"Modifier le rôle à attribuer aux personnes authentifiées",
 			type: "SUB_COMMAND",
 			options: [
 				{
@@ -20,6 +22,20 @@ const data: ApplicationCommandDataResolvable = {
 					description:
 						"Rôle à distribuer aux personnes authentifiées",
 					type: "ROLE",
+					required: true
+				}
+			]
+		},
+		{
+			name: "nickname",
+			description:
+				"Modifier le format du pseudo des personnes authentifiées",
+			type: "SUB_COMMAND",
+			options: [
+				{
+					name: "format",
+					description: "Format du pseudo des personnes authentifiées",
+					type: "STRING",
 					required: true
 				}
 			]
@@ -45,11 +61,24 @@ async function run(
 
 	switch (arg.getSubcommand()) {
 		case "role":
-			let role = arg.getRole("role", true)
+			const role = arg.getRole("role", true)
 			settings.verifiedRole = role.id
 			interaction.followUp(
 				`Le rôle ${role.toString()} sera à présent utilisé pour les personnes authentifiées sur ce serveur !`
 			)
+			break
+		case "nickname":
+			const format = arg.getString("format", true)
+			settings.nicknameFormat = format
+			const exampleUser = new Profile("francis.duport@utbm.fr", "")
+			exampleUser.nickname = "Table"
+			exampleUser.promo = 23
+			interaction.followUp(
+				`Le format de pseudo des personnes authentifiées sur ce serveur est désormais "${format}" !\nExemple : **${exampleUser.getNickname(
+					settings.nicknameFormat
+				)}**`
+			)
+			break
 	}
 
 	await settings.save()

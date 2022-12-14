@@ -45,7 +45,7 @@ module.exports = {
 
 		await user.save()
 		interaction.followUp(
-			"Un mail d'authentification vous a été envoyé\n*Le code d'authentification expirera dans 5mn*"
+			"Un mail d'authentification vous a été envoyé\n*Le code d'authentification expirera dans 10mn*"
 		)
 	}
 }
