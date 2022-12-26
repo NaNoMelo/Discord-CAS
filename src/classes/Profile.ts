@@ -4,13 +4,13 @@ import { Mail } from "./Mail"
 import fs from "fs"
 import { readFile } from "node:fs/promises"
 import { SendMailOptions } from "nodemailer"
-import { decrypt, encrypt } from "./Crypto"
+import { Crypto } from "./Crypto"
 import { Collection } from "discord.js"
 
 export class Profile {
 	mail: string
 	discordID: string
-	promo: Number | null
+	promo: Number | null | "prof"
 	authCode: string | null
 	authCodeCreationDate: number | null
 	firstName: string
@@ -40,7 +40,7 @@ export class Profile {
 		if (fs.existsSync(`${__dirname}/../data/${userID}.json`)) {
 			fs.writeFile(
 				`${__dirname}/../data/${userID}`,
-				await encrypt(
+				Crypto.encrypt(
 					await readFile(`${__dirname}/../data/${userID}.json`, {
 						encoding: "utf8"
 					})
@@ -57,7 +57,7 @@ export class Profile {
 
 		if (fs.existsSync(`${__dirname}/../data/${userID}`)) {
 			let user = JSON.parse(
-				decrypt(
+				Crypto.decrypt(
 					await readFile(`${__dirname}/../data/${userID}`, {
 						encoding: "utf8"
 					})
@@ -77,7 +77,7 @@ export class Profile {
 	async save() {
 		fs.writeFile(
 			`${__dirname}/../data/${this.discordID}`,
-			encrypt(JSON.stringify(this)),
+			Crypto.encrypt(JSON.stringify(this)),
 			{ flag: "w+" },
 			(err) => {
 				if (err) {

@@ -1,51 +1,53 @@
-import { CommandInteractionOptionResolver } from "discord.js"
 import { ExtendedInteraction } from "../typings/Command"
-import { ExtendedClient } from "../classes/Client"
 import { Profile } from "../classes/Profile"
+import { ApplicationCommandData } from "discord.js"
+import { Settings } from "../classes/Settings"
+import { Lang } from "../classes/Locale"
 
-module.exports = {
-	data: {
-		name: "cas",
-		description: "Commence l'authentification",
-		options: [
-			{
-				name: "mail",
-				description: "Saisir votre mail UTBM",
-				type: "STRING",
-				required: "true"
-			}
-		]
-	},
-	async run(
-		arg: CommandInteractionOptionResolver,
-		_client: ExtendedClient,
-		interaction: ExtendedInteraction
+const data: ApplicationCommandData = {
+	name: "cas",
+	description: "Commence l'authentification",
+	options: [
+		{
+			name: "mail",
+			description: "Saisir votre mail UTBM",
+			type: "STRING",
+			required: true
+		}
+	]
+}
+
+async function run(interaction: ExtendedInteraction) {
+	await interaction.deferReply()
+	let user = await Profile.get(interaction.user.id)
+	let settings = await Settings.get(interaction.guildId!)
+	if (
+		!interaction.options
+			.getString("mail", true)
+			.match(/^[a-zA-Z-]+\.[a-zA-Z-]+\d?@utbm\.fr$/)
 	) {
-		await interaction.deferReply()
-		if (
-			!arg
-				.getString("mail", true)
-				.match(/^[a-zA-Z-]+\.[a-zA-Z-]+\d?@utbm\.fr$/)
-		) {
-			interaction.followUp(
-				"L'adresse mail spécifiée n'est pas valide ! Merci de donner votre adresse mail UTBM"
-			)
-			return 1
-		}
-		let user = await Profile.get(interaction.user.id)
-		if (!user) {
-			user = new Profile(arg.getString("mail", true), interaction.user.id)
-		}
-		if (user.authed) {
-			interaction.followUp("Vous avez déjà été authentifié")
-			await user.save()
-			return
-		}
-		user.sendAuthMail()
-
-		await user.save()
 		interaction.followUp(
-			"Un mail d'authentification vous a été envoyé\n*Le code d'authentification expirera dans 10mn*"
+			Lang.get("cas.invalidMail", Lang.defaultLang, {
+				schoolName: "UTBM"
+			})
+		)
+		return 1
+	}
+	if (!user) {
+		user = new Profile(
+			interaction.options.getString("mail", true),
+			interaction.user.id
 		)
 	}
+	if (user.authed) {
+		interaction.followUp(Lang.get("cas.alreadyAuthed", Lang.defaultLang))
+		await user.save()
+		return
+	}
+	user.sendAuthMail()
+
+	await user.save()
+	interaction.followUp(Lang.get("cas.mailSent", Lang.defaultLang))
 }
+
+module.exports = { data, run }

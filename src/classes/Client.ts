@@ -7,7 +7,6 @@ import {
 import { promisify } from "util"
 import glob from "glob"
 import { CommandType } from "../typings/Command"
-import { RegisterCommandsOptions } from "../typings/Client"
 import { Event } from "./Events"
 import path from "path"
 
@@ -22,14 +21,15 @@ export class ExtendedClient extends Client {
 	}
 
 	async start() {
-		await this.registerModules()
-		await this.login(process.env.botToken)
+		this.registerCommands()
+		this.registerEvents()
+		this.login(process.env.botToken)
 	}
 
-	async registerCommands({
-		slashCommands,
-		guildID
-	}: RegisterCommandsOptions) {
+	async setCommands(
+		slashCommands: ApplicationCommandDataResolvable[],
+		guildID?: string
+	) {
 		if (guildID) {
 			this.guilds.cache
 				.get(guildID)
@@ -51,8 +51,7 @@ export class ExtendedClient extends Client {
 		}
 	}
 
-	async registerModules() {
-		//commands
+	async registerCommands() {
 		const slashCommands: ApplicationCommandDataResolvable[] = []
 		const commandFiles = await globPromise(
 			path
@@ -69,12 +68,11 @@ export class ExtendedClient extends Client {
 		}
 
 		this.on("ready", () => {
-			this.registerCommands({
-				slashCommands: slashCommands
-			})
+			this.setCommands(slashCommands)
 		})
+	}
 
-		//Events
+	async registerEvents() {
 		const eventFiles = await globPromise(
 			path
 				.join(process.cwd(), "src", "events", "*{.ts,.js}")

@@ -1,13 +1,10 @@
-import {
-	ApplicationCommandDataResolvable,
-	CommandInteractionOptionResolver
-} from "discord.js"
-import { ExtendedClient } from "../classes/Client"
+import { ApplicationCommandData } from "discord.js"
+import { Lang } from "../classes/Locale"
 import { Profile } from "../classes/Profile"
 import { Settings } from "../classes/Settings"
 import { ExtendedInteraction } from "../typings/Command"
 
-const data: ApplicationCommandDataResolvable = {
+const data: ApplicationCommandData = {
 	name: "settings",
 	description: "Permet de modifier les paramètres du bot",
 	options: [
@@ -44,11 +41,7 @@ const data: ApplicationCommandDataResolvable = {
 	dmPermission: false
 }
 
-async function run(
-	arg: CommandInteractionOptionResolver,
-	_client: ExtendedClient,
-	interaction: ExtendedInteraction
-) {
+async function run(interaction: ExtendedInteraction) {
 	await interaction.deferReply()
 	if (!interaction.guildId) {
 		interaction.followUp("Merci d'utiliser cette commande sur un serveur !")
@@ -58,25 +51,31 @@ async function run(
 	if (!settings) {
 		settings = new Settings(interaction.guildId)
 	}
-
-	switch (arg.getSubcommand()) {
+	if (!interaction.member.permissions.has("ADMINISTRATOR"))
+		return interaction.followUp(
+			Lang.get("error.permission", Lang.defaultLang)
+		)
+	switch (interaction.options.getSubcommand()) {
 		case "role":
-			const role = arg.getRole("role", true)
+			const role = interaction.options.getRole("role", true)
 			settings.verifiedRole = role.id
 			interaction.followUp(
-				`Le rôle ${role.toString()} sera à présent utilisé pour les personnes authentifiées sur ce serveur !`
+				Lang.get("settings.role.set", Lang.defaultLang, {
+					role: role.toString()
+				})
 			)
 			break
 		case "nickname":
-			const format = arg.getString("format", true)
+			const format = interaction.options.getString("format", true)
 			settings.nicknameFormat = format
 			const exampleUser = new Profile("francis.duport@utbm.fr", "")
 			exampleUser.nickname = "Table"
 			exampleUser.promo = 23
 			interaction.followUp(
-				`Le format de pseudo des personnes authentifiées sur ce serveur est désormais "${format}" !\nExemple : **${exampleUser.getNickname(
-					settings.nicknameFormat
-				)}**`
+				Lang.get("settings.format.set", Lang.defaultLang, {
+					format: format,
+					example: exampleUser.getNickname(settings.nicknameFormat)!
+				})
 			)
 			break
 	}
@@ -84,7 +83,4 @@ async function run(
 	await settings.save()
 }
 
-module.exports = {
-	data,
-	run
-}
+module.exports = { data, run }

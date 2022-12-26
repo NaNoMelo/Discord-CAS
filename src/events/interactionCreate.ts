@@ -1,11 +1,6 @@
-import {
-	AutocompleteInteraction,
-	CommandInteractionOptionResolver
-} from "discord.js"
 import { client } from ".."
 import { Event } from "../classes/Events"
 import { ExtendedInteraction } from "../typings/Command"
-import { ExtendedClient } from "../classes/Client"
 
 export default new Event("interactionCreate", async (interaction) => {
 	if (interaction.isCommand()) {
@@ -14,8 +9,6 @@ export default new Event("interactionCreate", async (interaction) => {
 
 		try {
 			command.run(
-				interaction.options as CommandInteractionOptionResolver,
-				client as ExtendedClient,
 				interaction as ExtendedInteraction
 			)
 		} catch (error) {
@@ -27,9 +20,7 @@ export default new Event("interactionCreate", async (interaction) => {
 		if (!command.autocomplete) return
 		try {
 			command.autocomplete(
-				interaction.options as CommandInteractionOptionResolver,
-				client as ExtendedClient,
-				interaction as AutocompleteInteraction
+				interaction
 			)
 		} catch (error) {
 			console.error(error)

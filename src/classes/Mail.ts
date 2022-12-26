@@ -1,5 +1,5 @@
 import { createTransport } from "nodemailer"
-import { decrypt } from "./Crypto"
+import { Crypto } from "./Crypto"
 
 export class Mail {
 	from: String
@@ -21,6 +21,6 @@ export let mailer = createTransport({
 	secure: true,
 	auth: {
 		user: process.env.mailUser,
-		pass: decrypt(process.env.mailPass as string)
+		pass: Crypto.decrypt(process.env.mailPass as string)
 	}
 })

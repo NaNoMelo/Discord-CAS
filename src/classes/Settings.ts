@@ -13,6 +13,7 @@ export class Settings {
 	}
 
 	static async get(guildID: String) {
+		if (guildID == null) guildID = "default"
 		if (fs.existsSync(`${__dirname}/../configs/${guildID}.json`)) {
 			let settings = JSON.parse(
 				await readFile(`${__dirname}/../configs/${guildID}.json`, {
