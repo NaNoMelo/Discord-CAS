@@ -14,9 +14,9 @@ export class Settings {
 
 	static async get(guildID: String) {
 		if (guildID == null) guildID = "default"
-		if (fs.existsSync(`${__dirname}/../configs/${guildID}.json`)) {
+		if (fs.existsSync(`${process.cwd()}/src/data/configs/${guildID}.json`)) {
 			let settings = JSON.parse(
-				await readFile(`${__dirname}/../configs/${guildID}.json`, {
+				await readFile(`${process.cwd()}/src/data/configs/${guildID}.json`, {
 					encoding: "utf8"
 				})
 			)
@@ -26,7 +26,7 @@ export class Settings {
 
 	async save() {
 		fs.writeFile(
-			`${__dirname}/../configs/${this.guildID}.json`,
+			`${process.cwd()}/src/data/configs/${this.guildID}.json`,
 			JSON.stringify(this),
 			{ flag: "w+" },
 			(err) => {

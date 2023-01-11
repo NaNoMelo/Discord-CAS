@@ -37,13 +37,16 @@ export class Profile {
 	}
 
 	static async get(userID: String) {
-		if (fs.existsSync(`${__dirname}/../data/${userID}.json`)) {
+		if (fs.existsSync(`${process.cwd()}/src/data/users/${userID}.json`)) {
 			fs.writeFile(
-				`${__dirname}/../data/${userID}`,
+				`${process.cwd()}/src/data/users/${userID}`,
 				Crypto.encrypt(
-					await readFile(`${__dirname}/../data/${userID}.json`, {
-						encoding: "utf8"
-					})
+					await readFile(
+						`${process.cwd()}/src/data/users/${userID}.json`,
+						{
+							encoding: "utf8"
+						}
+					)
 				),
 				{ flag: "w+" },
 				(err) => {
@@ -52,13 +55,13 @@ export class Profile {
 					}
 				}
 			)
-			fs.rmSync(`${__dirname}/../data/${userID}.json`)
+			fs.rmSync(`${process.cwd()}/src/data/users/${userID}.json`)
 		}
 
-		if (fs.existsSync(`${__dirname}/../data/${userID}`)) {
+		if (fs.existsSync(`${process.cwd()}/src/data/users/${userID}`)) {
 			let user = JSON.parse(
 				Crypto.decrypt(
-					await readFile(`${__dirname}/../data/${userID}`, {
+					await readFile(`${process.cwd()}/src/data/users/${userID}`, {
 						encoding: "utf8"
 					})
 				)
@@ -76,7 +79,7 @@ export class Profile {
 
 	async save() {
 		fs.writeFile(
-			`${__dirname}/../data/${this.discordID}`,
+			`${process.cwd()}/src/data/users/${this.discordID}`,
 			Crypto.encrypt(JSON.stringify(this)),
 			{ flag: "w+" },
 			(err) => {

@@ -5,7 +5,7 @@ declare global {
 		interface ProcessEnv {
 			botToken: string
 			guildId: string
-			environement?: "dev" | "prod" | "debug"
+			environement?: "dev" | "prod" | "debug" | "docker"
 			mailUser: string
 			mailPass: string
 			encryptPass: string
