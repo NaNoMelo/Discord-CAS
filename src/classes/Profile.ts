@@ -10,20 +10,17 @@ import { Collection } from "discord.js"
 export class Profile {
 	mail: string
 	discordID: string
-	promo: Number | null | "prof"
-	authCode: string | null
-	authCodeCreationDate: number | null
+	promo?: number | "prof"
+	authCode?: string
+	authCodeCreationDate?: number
 	firstName: string
 	lastName: string
-	nickname: string | null
-	authed: Boolean
+	nickname?: string
+	authed: boolean
 
 	constructor(mail: string, discordID: string) {
 		this.mail = mail
 		this.discordID = discordID
-		this.promo = null
-		this.authCode = null
-		this.authCodeCreationDate = null
 		this.firstName = mail.slice(0, mail.indexOf(".")).toLowerCase()
 		this.firstName =
 			this.firstName.charAt(0).toUpperCase() + this.firstName.slice(1)
@@ -32,7 +29,6 @@ export class Profile {
 			.toLowerCase()
 		this.lastName =
 			this.lastName.charAt(0).toUpperCase() + this.lastName.slice(1)
-		this.nickname = null
 		this.authed = false
 	}
 
@@ -49,10 +45,11 @@ export class Profile {
 				(err) => {
 					if (err) {
 						console.log(err)
+					} else {
+						fs.rmSync(`${__dirname}/../data/${userID}.json`)
 					}
 				}
 			)
-			fs.rmSync(`${__dirname}/../data/${userID}.json`)
 		}
 
 		if (fs.existsSync(`${__dirname}/../data/${userID}`)) {
@@ -66,8 +63,8 @@ export class Profile {
 			user = Object.assign(new Profile("", ""), user)
 			if (user.authCode && user.authCodeCreationDate) {
 				if (Date.now() - user.authCodeCreationDate > 600000) {
-					user.authCode = null
-					user.authCodeCreationDate = null
+					user.authCode = undefined
+					user.authCodeCreationDate = undefined
 				}
 			}
 			return user
@@ -86,6 +83,18 @@ export class Profile {
 			}
 		)
 	}
+
+	public async checkUniqueMail(mail : string) : Promise<boolean> {
+		let files = fs.readdirSync(`${__dirname}/../data/users`)
+		for (let file of files) {
+			let user = await Profile.get(file)
+			if (user.mail == mail) {
+				return false
+			}
+		}
+		return true
+	}
+
 
 	async genAuthCode() {
 		let chars = "0123456789"

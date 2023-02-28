@@ -38,11 +38,12 @@ async function run(interaction: ExtendedInteraction) {
 			interaction.options.getString("mail", true),
 			interaction.user.id
 		)
-	}
-	if (user.authed) {
+	} else if (user.authed) {
 		interaction.followUp(Lang.get("cas.alreadyAuthed", Lang.defaultLang))
 		await user.save()
 		return
+	} else {
+		user.mail = interaction.options.getString("mail", true)
 	}
 	user.sendAuthMail()
 

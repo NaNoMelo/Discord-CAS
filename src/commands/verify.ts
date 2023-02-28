@@ -20,25 +20,28 @@ const data: ApplicationCommandData = {
 async function run(interaction: ExtendedInteraction) {
 	await interaction.deferReply()
 	let user = await Profile.get(interaction.user.id)
-	let settings = await Settings.get(interaction.guildId!)
+	let settings: Settings | undefined
+	if (interaction.guildId) settings = await Settings.get(interaction.guildId)
 
 	if (!user) {
 		interaction.followUp(Lang.get("cas.auth.notStarted", Lang.defaultLang))
 		return
 	}
 	if (!user.authCode) {
-		interaction.followUp(Lang.get("cas.auth.noCode", Lang.defaultLang))
+		interaction.followUp(Lang.get("cas.auth.expired", Lang.defaultLang))
 		return
 	}
 	if (user.authCode == interaction.options.getString("code", true)) {
 		user.authed = true
-		if (interaction.guild) {
-			let role = interaction.guild.roles.cache.find(
-				(r) => r.id == settings.verifiedRole
+		if (interaction.guildId && settings) {
+			let role = interaction.guild?.roles.cache.find(
+				(r) => r.id == settings?.verifiedRole
 			)
 			if (role) interaction.member.roles.add(role)
 			if (settings.nicknameFormat) {
-				interaction.member.setNickname(settings.nicknameFormat(user))
+				interaction.member.setNickname(
+					user.getNickname(settings.nicknameFormat)
+				)
 			}
 		}
 		await user.save()

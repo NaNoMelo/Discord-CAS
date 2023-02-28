@@ -2,23 +2,25 @@ import fs from "fs"
 import { readFile } from "node:fs/promises"
 
 export class Settings {
-	guildID: String
-	verifiedRole: String
-	nicknameFormat: String | null
+	guildID: string
+	verifiedRole: string
+	nicknameFormat?: string
 
-	constructor(guildID: String) {
+	constructor(guildID: string) {
 		this.guildID = guildID
 		this.verifiedRole = ""
-		this.nicknameFormat = null
 	}
 
-	static async get(guildID: String) {
+	static async get(guildID: string) {
 		if (guildID == null) guildID = "default"
-		if (fs.existsSync(`${__dirname}/../configs/${guildID}.json`)) {
+		if (fs.existsSync(`${process.cwd}/src/data/configs/${guildID}.json`)) {
 			let settings = JSON.parse(
-				await readFile(`${__dirname}/../configs/${guildID}.json`, {
-					encoding: "utf8"
-				})
+				await readFile(
+					`${process.cwd}/src/data/configs/${guildID}.json`,
+					{
+						encoding: "utf8"
+					}
+				)
 			)
 			return Object.assign(new Settings(""), settings)
 		}

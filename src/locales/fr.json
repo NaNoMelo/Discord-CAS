@@ -7,13 +7,12 @@
 		"invalidMail": "Adresse mail invalide ! Veuillez saisir votre adresse mail {schoolName} !",
 		"alreadyAuthed": "Vous êtes déjà authentifié !",
 		"mailSent": "Un mail d'authentification vous a été envoyé\n*Le code d'authentification expirera dans 10mn*",
-		"auth":{
-			"notStarted":"Merci de commencer l'authentification avec la commande /cas",
-			"succes":"Vous avez bien été authentifié !",
-			"expired":"Votre code d'authentification a expiré ou n'a pas été créé !\nMerci de recommencer l'authentification avec la commande /cas",
-			"invalidCode":"Le code saisi ne correspond pas avec celui qui vous a été envoyé !"
+		"auth": {
+			"notStarted": "Merci de commencer l'authentification avec la commande /cas",
+			"success": "Vous avez bien été authentifié !",
+			"expired": "Votre code d'authentification a expiré ou n'a pas été créé !\nMerci de recommencer l'authentification avec la commande /cas",
+			"invalidCode": "Le code saisi ne correspond pas avec celui qui vous a été envoyé !"
 		}
-
 	},
 	"nickname": {
 		"tooLong": "Votre pseudo est trop long, il doit faire moins de 32 caractères !",
@@ -23,8 +22,11 @@
 		"role": {
 			"set": "Le rôle {role} sera à présent utilisé pour les personnes authentifiées sur ce serveur !"
 		},
-		"format":{
-			"set":"Le format de pseudo des personnes authentifiées sur ce serveur est désormais \"{format}\" !\nExemple : **{example}**"
+		"format": {
+			"set": "Le format de pseudo des personnes authentifiées sur ce serveur est désormais \"{format}\" !\nExemple : **{example}**"
 		}
+	},
+	"welcome": {
+		"message": "Bienvenue sur le serveur {serverName} !\nPour accéder à l'entièreté du serveur, vous devrez vous authentifier avec votre adresse mail {schoolName}.\nPour cela, merci de la saisir ci-dessous. Vous recevrez un mail d'authentification.\n\n*Si vous ne recevez pas de mail, merci de vérifier vos spams et de contacter un administrateur.*"
 	}
 }

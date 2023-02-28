@@ -47,7 +47,13 @@ export class Lang {
 			return `missing locale for language '${language}'`
 		}
 		const keys = key.split(".")
-		let value: string = keys.reduce((obj: any, key) => obj[key], locale)
+		let value: string | undefined
+		try {
+			value = keys.reduce((obj: any, key) => obj[key], locale)
+		} catch (error:any) {
+			console.error(error)
+			value = undefined
+		}
 
 		if (!value) {
 			if (key == "error.lang.missing") {
