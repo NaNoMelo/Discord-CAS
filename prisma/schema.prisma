@@ -1,0 +1,57 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Profile {
+  id               String   @id @unique
+  mail             String   @unique
+  promo            Int?
+  authCode         String
+  authCodeCreation DateTime @default(now())
+  firstName        String
+  lastName         String
+  nickname         String?
+  authed           Boolean  @default(false)
+  uvs              UV[]     @relation("members")
+  passedUVs        UV[]     @relation("pastMembers")
+  admin            Boolean  @default(false)
+}
+
+model UV {
+  id          String    @id @unique
+  name        String
+  members     Profile[] @relation("members")
+  pastMembers Profile[] @relation("pastMembers")
+  uvRoles     UVRole[]
+}
+
+model guildConfig {
+  id             String      @id @unique
+  nicknameFormat String
+  verifiedRole   String
+  promoRoles     PromoRole[]
+  uvRoles        UVRole[]
+}
+
+model UVRole {
+  uvName  String      @id @unique
+  uv      UV          @relation(fields: [uvName], references: [id])
+  guildId String
+  guild   guildConfig @relation(fields: [guildId], references: [id])
+  role    String
+}
+
+model PromoRole {
+  promo   Int         @id @unique
+  guildId String
+  guild   guildConfig @relation(fields: [guildId], references: [id])
+  role    String
+}

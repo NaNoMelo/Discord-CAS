@@ -6,6 +6,8 @@ import { readFile } from "node:fs/promises"
 import { SendMailOptions } from "nodemailer"
 import { Crypto } from "./Crypto"
 import { Collection } from "discord.js"
+import { PrismaClient } from "@prisma/client"
+const prisma = new PrismaClient()
 
 export class Profile {
 	mail: string
@@ -19,6 +21,11 @@ export class Profile {
 	authed: boolean
 
 	constructor(mail: string, discordID: string) {
+		let userData = prisma.profile.findUnique({
+			where: {
+				id: discordID
+			}
+		})
 		this.mail = mail
 		this.discordID = discordID
 		this.firstName = mail.slice(0, mail.indexOf(".")).toLowerCase()
