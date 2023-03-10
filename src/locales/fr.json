@@ -1,7 +1,8 @@
 {
 	"error": {
 		"permission": "Vous n'avez pas la permission s'utiliser cette commande !",
-		"notAuthed": "Vous n'êtes pas authentifié !"
+		"notAuthed": "Vous n'êtes pas authentifié !",
+		"notInGuild": "Cette commande ne peut être utilisée que dans un serveur !"
 	},
 	"cas": {
 		"invalidMail": "Adresse mail invalide ! Veuillez saisir votre adresse mail {schoolName} !",
@@ -28,5 +29,18 @@
 	},
 	"welcome": {
 		"message": "Bienvenue sur le serveur {serverName} !\nPour accéder à l'entièreté du serveur, vous devrez vous authentifier avec votre adresse mail {schoolName}.\nPour cela, merci de la saisir ci-dessous. Vous recevrez un mail d'authentification.\n\n*Si vous ne recevez pas de mail, merci de vérifier vos spams et de contacter un administrateur.*"
+	},
+	"uv": {
+		"add": {
+			"success": "L'UV {uv} a bien été ajoutée à la base de données !",
+			"alreadyAdded": "L'UV {uv} est déjà dans la base de données !"
+		},
+		"remove": {
+			"success": "L'UV {uv} a bien été supprimée de la base de données !",
+			"notFound": "L'UV {uv} n'est pas dans la base de données !"
+		},
+		"error": {
+			"code": "Le code saisi est invalide !"
+		}
 	}
 }

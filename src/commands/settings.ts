@@ -44,7 +44,7 @@ const data: ApplicationCommandData = {
 async function run(interaction: ExtendedInteraction) {
 	await interaction.deferReply()
 	if (!interaction.guildId) {
-		interaction.followUp("Merci d'utiliser cette commande sur un serveur !")
+		interaction.followUp(Lang.get("error.guild", Lang.defaultLang))
 		return
 	}
 	let settings = await Settings.get(interaction.guildId?.toString())

@@ -21,11 +21,6 @@ export class Profile {
 	authed: boolean
 
 	constructor(mail: string, discordID: string) {
-		let userData = prisma.profile.findUnique({
-			where: {
-				id: discordID
-			}
-		})
 		this.mail = mail
 		this.discordID = discordID
 		this.firstName = mail.slice(0, mail.indexOf(".")).toLowerCase()
@@ -39,7 +34,12 @@ export class Profile {
 		this.authed = false
 	}
 
-	static async get(userID: String) {
+	static async get(userID: string) {
+		prisma.profile.findUnique({
+			where: {
+				id: userID
+			}
+		})
 		if (fs.existsSync(`${__dirname}/../data/${userID}.json`)) {
 			fs.writeFile(
 				`${__dirname}/../data/${userID}`,
