@@ -45,19 +45,21 @@ async function run(interaction: ExtendedInteraction) {
 		await user.save()
 		return
 	}
-	
+
 	user.mail = interaction.options.getString("mail", true)
 
 	await user
 		.sendAuthMail()
-		.then(() => {
+		.then(() =>
 			interaction.followUp(Lang.get("cas.mailSent", Lang.defaultLang))
-		})
-		.catch(() => {
+		)
+		.catch(() =>
 			interaction.followUp(Lang.get("cas.error", Lang.defaultLang))
-		})
+		)
 
-	await user.save()
+	await user.save().catch(() => {
+		interaction.followUp(Lang.get("cas.error", Lang.defaultLang))
+	})
 }
 
 module.exports = { data, run }

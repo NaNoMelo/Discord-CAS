@@ -13,7 +13,8 @@
 			"success": "Vous avez bien été authentifié !",
 			"expired": "Votre code d'authentification a expiré ou n'a pas été créé !\nMerci de recommencer l'authentification avec la commande /cas",
 			"invalidCode": "Le code saisi ne correspond pas avec celui qui vous a été envoyé !"
-		}
+		},
+		"error": "Une erreur est survenue lors de l'authentification ! Merci réessayer ulterieurement.\n*Si le problème persiste, merci de contacter un administrateur.*"
 	},
 	"nickname": {
 		"tooLong": "Votre pseudo est trop long, il doit faire moins de 32 caractères !",

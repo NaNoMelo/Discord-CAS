@@ -19,18 +19,28 @@ const data: ApplicationCommandData = {
 
 async function run(interaction: ExtendedInteraction) {
 	await interaction.deferReply()
-	let user = await Profile.get(interaction.user.id)
+
+	const user = await Profile.get(interaction.user.id).catch(() => {
+		interaction.followUp(Lang.get("cas.auth.notStarted", Lang.defaultLang))
+	})
+	if (!user) return
+
 	let settings: Settings | undefined
 	if (interaction.guildId) settings = await Settings.get(interaction.guildId)
 
-	if (!user) {
+	if (!user.authCodeCreation) {
 		interaction.followUp(Lang.get("cas.auth.notStarted", Lang.defaultLang))
 		return
 	}
-	if (!user.authCode) {
+
+	if (
+		new Date().getTime() - user.authCodeCreation.getTime() >
+		1000 * 60 * 5
+	) {
 		interaction.followUp(Lang.get("cas.auth.expired", Lang.defaultLang))
 		return
 	}
+
 	if (user.authCode == interaction.options.getString("code", true)) {
 		user.authed = true
 		if (interaction.guildId && settings) {
@@ -44,8 +54,19 @@ async function run(interaction: ExtendedInteraction) {
 				)
 			}
 		}
-		await user.save()
-		interaction.followUp(Lang.get("cas.auth.success", Lang.defaultLang))
+		
+		await user
+			.save()
+			.then(() => {
+				interaction.followUp(
+					Lang.get("cas.auth.success", Lang.defaultLang)
+				)
+			})
+			.catch(() => {
+				interaction.followUp(
+					Lang.get("cas.auth.error", Lang.defaultLang)
+				)
+			})
 	} else {
 		interaction.followUp(Lang.get("cas.auth.invalidCode", Lang.defaultLang))
 	}

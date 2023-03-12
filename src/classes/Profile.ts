@@ -42,7 +42,7 @@ export class Profile {
 	}
 
 	async save() {
-		await prisma.profile.update({
+		return await prisma.profile.update({
 			where: {
 				id: this.prismaUser.id
 			},
@@ -74,6 +74,12 @@ export class Profile {
 	get nickname(): string | null {
 		return this.prismaUser.nickname
 	}
+	get authCode(): string | null {
+		return this.prismaUser.authCode
+	}
+	get authCodeCreation(): Date | null {
+		return this.prismaUser.authCodeCreation
+	}
 
 	//Setters
 	set nickname(nickname: string | null) {
@@ -85,6 +91,9 @@ export class Profile {
 		} else {
 			throw new Error("Invalid mail")
 		}
+	}
+	set authed(authed: boolean) {
+		this.prismaUser.authed = authed
 	}
 
 	//Methods
