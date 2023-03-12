@@ -68,15 +68,22 @@ async function run(interaction: ExtendedInteraction) {
 		case "nickname":
 			const format = interaction.options.getString("format", true)
 			settings.nicknameFormat = format
-			const exampleUser = new Profile("francis.duport@utbm.fr", "")
-			exampleUser.nickname = "Table"
-			exampleUser.promo = 23
-			interaction.followUp(
-				Lang.get("settings.format.set", Lang.defaultLang, {
-					format: format,
-					example: exampleUser.getNickname(settings.nicknameFormat)!
+			await Profile.get(interaction.user.id)
+				.then((user) => {
+					interaction.followUp(
+						Lang.get("settings.format.set", Lang.defaultLang, {
+							format: format,
+							example: user.getDiscordNick(
+								settings.nicknameFormat as string
+							)
+						})
+					)
 				})
-			)
+				.catch(() =>
+					interaction.followUp(
+						Lang.get("error.user", Lang.defaultLang)
+					)
+				)
 			break
 	}
 

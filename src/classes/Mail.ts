@@ -1,7 +1,7 @@
-import { createTransport } from "nodemailer"
+import { createTransport, SendMailOptions } from "nodemailer"
 import { Crypto } from "./Crypto"
 
-export class Mail {
+export class CasMail implements SendMailOptions {
 	from: string
 	to: string
 	subject: string

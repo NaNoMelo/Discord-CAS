@@ -19,8 +19,7 @@ const data: ApplicationCommandData = {
 
 async function run(interaction: ExtendedInteraction) {
 	await interaction.deferReply()
-	let user = await Profile.get(interaction.user.id)
-	let settings = await Settings.get(interaction.guildId!)
+
 	if (
 		!interaction.options
 			.getString("mail", true)
@@ -31,24 +30,34 @@ async function run(interaction: ExtendedInteraction) {
 				schoolName: "UTBM"
 			})
 		)
-		return 1
+		return
 	}
-	if (!user) {
-		user = new Profile(
-			interaction.options.getString("mail", true),
-			interaction.user.id
+
+	const user: Profile = await Profile.get(interaction.user.id).catch(() => {
+		return Profile.create(
+			interaction.user.id,
+			interaction.options.getString("mail", true)
 		)
-	} else if (user.authed) {
+	})
+
+	if (user.authed) {
 		interaction.followUp(Lang.get("cas.alreadyAuthed", Lang.defaultLang))
 		await user.save()
 		return
-	} else {
-		user.mail = interaction.options.getString("mail", true)
 	}
-	user.sendAuthMail()
+	
+	user.mail = interaction.options.getString("mail", true)
+
+	await user
+		.sendAuthMail()
+		.then(() => {
+			interaction.followUp(Lang.get("cas.mailSent", Lang.defaultLang))
+		})
+		.catch(() => {
+			interaction.followUp(Lang.get("cas.error", Lang.defaultLang))
+		})
 
 	await user.save()
-	interaction.followUp(Lang.get("cas.mailSent", Lang.defaultLang))
 }
 
 module.exports = { data, run }

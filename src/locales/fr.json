@@ -39,6 +39,14 @@
 			"success": "L'UV {uv} a bien été supprimée de la base de données !",
 			"notFound": "L'UV {uv} n'est pas dans la base de données !"
 		},
+		"list": {
+			"empty": "Aucune UV n'est enregistrée dans la base de données !",
+			"list": "Liste des UVs enregistrées dans la base de données :\n{list}"
+		},
+		"members": {
+			"empty": "Aucun membre n'est inscrit à l'UV {uv} !",
+			"list": "Liste des membres inscrits à l'UV {uv} :\n{list}"
+		},
 		"error": {
 			"code": "Le code saisi est invalide !"
 		}

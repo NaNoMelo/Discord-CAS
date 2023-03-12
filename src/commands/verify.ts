@@ -40,7 +40,7 @@ async function run(interaction: ExtendedInteraction) {
 			if (role) interaction.member.roles.add(role)
 			if (settings.nicknameFormat) {
 				interaction.member.setNickname(
-					user.getNickname(settings.nicknameFormat)
+					user.getDiscordNick(settings.nicknameFormat)
 				)
 			}
 		}

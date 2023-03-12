@@ -109,3 +109,5 @@ src/configs/
 
 # Prettier config
 .prettierrc
+
+*.db

@@ -14,7 +14,7 @@ model Profile {
   id               String   @id @unique
   mail             String   @unique
   promo            Int?
-  authCode         String
+  authCode         String?
   authCodeCreation DateTime @default(now())
   firstName        String
   lastName         String
@@ -35,7 +35,7 @@ model UV {
 
 model guildConfig {
   id             String      @id @unique
-  nicknameFormat String
+  nicknameFormat String      @default("{firstName} {lastName}")
   verifiedRole   String
   promoRoles     PromoRole[]
   uvRoles        UVRole[]

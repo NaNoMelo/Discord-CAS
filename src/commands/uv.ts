@@ -27,26 +27,44 @@ const data: ApplicationCommandData = {
 				}
 			]
 		},
-        {
-            name: "remove",
-            description: "Remove an UV",
-            type: "SUB_COMMAND",
-            options: [
-                {
-                    name: "code",
-                    description: "Code of the UV",
-                    type: "STRING",
-                    required: true
-                }
-            ]
-        }
+		{
+			name: "remove",
+			description: "Remove an UV",
+			type: "SUB_COMMAND",
+			options: [
+				{
+					name: "code",
+					description: "Code of the UV",
+					type: "STRING",
+					required: true
+				}
+			]
+		},
+		{
+			name: "list",
+			description: "List all the UVs",
+			type: "SUB_COMMAND"
+		},
+		{
+			name: "members",
+			description: "List all the members of an UV",
+			type: "SUB_COMMAND",
+			options: [
+				{
+					name: "code",
+					description: "Code of the UV",
+					type: "STRING",
+					required: true
+				}
+			]
+		}
 	],
 	dmPermission: true
 }
 
 async function run(interaction: ExtendedInteraction) {
 	await interaction.deferReply()
-    let code, name
+	let code, name
 	switch (interaction.options.getSubcommand()) {
 		case "add":
 			name = interaction.options.getString("name", true)
@@ -70,26 +88,64 @@ async function run(interaction: ExtendedInteraction) {
 			} else {
 				interaction.followUp(Lang.get("uv.error.code", "fr"))
 			}
-            break
+			break
 
-        case "remove":
-            code = interaction.options.getString("code", true)
-            if (code.match(/^[A-Z]{2}[0-9A-Z]{2}$/)) {
-                if (await prisma.uV.findUnique({ where: { id: code } })) {
-                    await prisma.uV.delete({ where: { id: code } })
-                    interaction.followUp(
-                        Lang.get("uv.remove.success", "fr", { uv: code })
-                    )
-                } else {
-                    interaction.followUp(
-                        Lang.get("uv.remove.notFound", "fr", { uv: code })
-                    )
-                }
-            } else {
-                interaction.followUp(Lang.get("uv.error.code", "fr"))
-            }
-            break
-        
+		case "remove":
+			code = interaction.options.getString("code", true)
+			if (code.match(/^[A-Z]{2}[0-9A-Z]{2}$/)) {
+				if (await prisma.uV.findUnique({ where: { id: code } })) {
+					await prisma.uV.delete({ where: { id: code } })
+					interaction.followUp(
+						Lang.get("uv.remove.success", "fr", { uv: code })
+					)
+				} else {
+					interaction.followUp(
+						Lang.get("uv.remove.notFound", "fr", { uv: code })
+					)
+				}
+			} else {
+				interaction.followUp(Lang.get("uv.error.code", "fr"))
+			}
+			break
+
+		case "list":
+			const uvs = await prisma.uV.findMany()
+			if (uvs) {
+				let text = ""
+				for (const uv of uvs) {
+					text += `__**${uv.id}:**__\t${uv.name}\n`
+				}
+				interaction.followUp(
+					Lang.get("uv.list.list", "fr", { list: text })
+				)
+			} else {
+				interaction.followUp(Lang.get("uv.list.empty", "fr"))
+			}
+			break
+
+		case "members":
+			code = interaction.options.getString("code", true)
+			if (code.match(/^[A-Z]{2}[0-9A-Z]{2}$/)) {
+				const members = await prisma.uV.findUnique({
+					where: { id: code },
+					include: { members: true }
+				})
+				if (members) {
+					let text = ""
+					for (const member of members.members) {
+						text += `${member.firstName} ${member.lastName} ${member.nickname?"*(aka: "+member.nickname+")*":""}\n`
+					}
+					interaction.followUp(
+						Lang.get("uv.members.list", "fr", { uv: code, list: text })
+					)
+				} else {
+					interaction.followUp(
+						Lang.get("uv.members.empty", "fr", { uv: code })
+					)
+				}
+			} else {
+				interaction.followUp(Lang.get("uv.error.code", "fr"))
+			}
 	}
 }
 
