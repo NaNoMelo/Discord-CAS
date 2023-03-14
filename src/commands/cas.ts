@@ -1,7 +1,6 @@
 import { ExtendedInteraction } from "../typings/Command"
 import { Profile } from "../classes/Profile"
 import { ApplicationCommandData } from "discord.js"
-import { Settings } from "../classes/Settings"
 import { Lang } from "../classes/Locale"
 
 const data: ApplicationCommandData = {
@@ -33,12 +32,12 @@ async function run(interaction: ExtendedInteraction) {
 		return
 	}
 
-	const user: Profile = await Profile.get(interaction.user.id).catch(() => {
-		return Profile.create(
+	const user: Profile = await Profile.get(interaction.user.id).catch(() =>
+		Profile.create(
 			interaction.user.id,
 			interaction.options.getString("mail", true)
 		)
-	})
+	)
 
 	if (user.authed) {
 		interaction.followUp(Lang.get("cas.alreadyAuthed", Lang.defaultLang))

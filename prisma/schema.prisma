@@ -33,25 +33,25 @@ model UV {
   uvRoles     UVRole[]
 }
 
-model guildConfig {
+model GuildConfig {
   id             String      @id @unique
   nicknameFormat String      @default("{firstName} {lastName}")
-  verifiedRole   String
+  verifiedRole   String?
   promoRoles     PromoRole[]
   uvRoles        UVRole[]
 }
 
 model UVRole {
-  uvName  String      @id @unique
+  uvName  String      @id
   uv      UV          @relation(fields: [uvName], references: [id])
   guildId String
-  guild   guildConfig @relation(fields: [guildId], references: [id])
+  guild   GuildConfig @relation(fields: [guildId], references: [id])
   role    String
 }
 
 model PromoRole {
-  promo   Int         @id @unique
+  promo   Int         @id
   guildId String
-  guild   guildConfig @relation(fields: [guildId], references: [id])
+  guild   GuildConfig @relation(fields: [guildId], references: [id])
   role    String
 }

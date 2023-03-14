@@ -43,18 +43,27 @@ const data: ApplicationCommandData = {
 
 async function run(interaction: ExtendedInteraction) {
 	await interaction.deferReply()
-	if (!interaction.guildId) {
-		interaction.followUp(Lang.get("error.guild", Lang.defaultLang))
+
+	if (!interaction.inGuild()) {
+		interaction.followUp(Lang.get("error.notInGuild", Lang.defaultLang))
 		return
 	}
-	let settings = await Settings.get(interaction.guildId?.toString())
-	if (!settings) {
-		settings = new Settings(interaction.guildId)
-	}
-	if (!interaction.member.permissions.has("ADMINISTRATOR"))
+	const user: Profile | void = await Profile.get(interaction.user.id).catch(
+		() => {
+			interaction.followUp(Lang.get("error.notAuthed", Lang.defaultLang))
+		}
+	)
+	if (!user) return
+
+	const settings: Settings = await Settings.get(interaction.guildId).catch(
+		() => Settings.create(interaction.guildId)
+	)
+
+	if (!user.admin)
 		return interaction.followUp(
 			Lang.get("error.permission", Lang.defaultLang)
 		)
+
 	switch (interaction.options.getSubcommand()) {
 		case "role":
 			const role = interaction.options.getRole("role", true)
@@ -68,23 +77,19 @@ async function run(interaction: ExtendedInteraction) {
 		case "nickname":
 			const format = interaction.options.getString("format", true)
 			settings.nicknameFormat = format
-			await Profile.get(interaction.user.id)
-				.then((user) => {
-					interaction.followUp(
-						Lang.get("settings.format.set", Lang.defaultLang, {
-							format: format,
-							example: user.getDiscordNick(
-								settings.nicknameFormat as string
-							)
-						})
+			interaction.followUp(
+				Lang.get("settings.format.set", Lang.defaultLang, {
+					format: format,
+					example: user.getDiscordNick(
+						settings.nicknameFormat
 					)
 				})
-				.catch(() =>
-					interaction.followUp(
-						Lang.get("error.user", Lang.defaultLang)
-					)
-				)
+			)
 			break
+
+		case "promo":
+			const promo = interaction.options.getString("promo", true)
+			
 	}
 
 	await settings.save()

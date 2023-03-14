@@ -110,4 +110,6 @@ src/configs/
 # Prettier config
 .prettierrc
 
+# Prisma
+prisma/dev.db
 *.db
