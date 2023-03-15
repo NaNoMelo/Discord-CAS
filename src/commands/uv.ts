@@ -1,8 +1,8 @@
-import { ApplicationCommandData } from "discord.js"
-import { ExtendedInteraction } from "../typings/Command"
+import { ApplicationCommandData, CommandInteraction } from "discord.js"
 import { PrismaClient } from "@prisma/client"
 import { Lang } from "../classes/Locale"
 import { Profile } from "../classes/Profile"
+import { UV } from "../classes/UV"
 const prisma = new PrismaClient()
 
 const data: ApplicationCommandData = {
@@ -76,16 +76,20 @@ const data: ApplicationCommandData = {
     dmPermission: true
 }
 
-async function run(interaction: ExtendedInteraction) {
+async function run(interaction: CommandInteraction): Promise<void> {
     await interaction.deferReply()
     const user = await Profile.get(interaction.user.id).catch(() => {
         interaction.followUp(Lang.get("error.Authed", "fr"))
     })
     if (!user) return
 
-    let code, name
+    let code: string, name: string, uv: UV | void
     switch (interaction.options.getSubcommand()) {
         case "add":
+            if (!user.admin) {
+                interaction.followUp(Lang.get("error.permission", "fr"))
+                return
+            }
             name = interaction.options.getString("name", true)
             code = interaction.options.getString("code", true)
             if (code.match(/^[A-Z]{2}[0-9A-Z]{2}$/)) {
@@ -110,6 +114,10 @@ async function run(interaction: ExtendedInteraction) {
             break
 
         case "remove":
+            if (!user.admin) {
+                interaction.followUp(Lang.get("error.permission", "fr"))
+                return
+            }
             code = interaction.options.getString("code", true)
             if (code.match(/^[A-Z]{2}[0-9A-Z]{2}$/)) {
                 if (await prisma.uV.findUnique({ where: { id: code } })) {
@@ -176,7 +184,23 @@ async function run(interaction: ExtendedInteraction) {
 
         case "join":
             code = interaction.options.getString("code", true)
-			user.joinUV(code)
+
+            uv = await UV.get(code).catch(() => {
+                interaction.followUp(
+                    Lang.get("uv.error.notFound", "fr", { uv: code })
+                )
+                return
+            })
+            if (!uv) return
+            await uv
+                .addMember(code)
+                .then(() =>
+                    interaction.followUp(
+                        Lang.get("uv.join.success", "fr", { uv: code })
+                    )
+                )
+
+            break
     }
 }
 

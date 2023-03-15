@@ -1,7 +1,7 @@
 import { PrismaClient, UV as PrismaUV } from "@prisma/client"
 const prisma = new PrismaClient()
 
-class UV {
+export class UV {
     constructor(private prismaUV: PrismaUV) {}
 
     static async get(uvName: string): Promise<UV> {
@@ -46,7 +46,7 @@ class UV {
         })
     }
 
-    async addUser(userID: string) {
+    async addMember(userID: string) {
         prisma.uV.update({
             where: {
                 id: this.prismaUV.id

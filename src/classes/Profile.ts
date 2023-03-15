@@ -15,11 +15,16 @@ export class Profile {
                     id: userID
                 }
             })
-            .then((userData) =>
-                userData
-                    ? Promise.resolve(new Profile(userData))
-                    : Promise.reject(new Error("User does not exist"))
-            )
+            .then((userData) => {
+                if (userData) {
+                    if (Date.now() - userData.authCodeCreation.getTime() > 1000 * 60 * 10) {
+                        userData.authCode = null
+                    }
+                    return Promise.resolve(new Profile(userData))
+                } else {
+                    return Promise.reject(new Error("User not authed"))
+                }
+            })
     }
 
     static async create(userID: string, mail: string): Promise<Profile> {
@@ -134,16 +139,5 @@ export class Profile {
                 }
             }
         )
-    }
-
-    async joinUV(uvId: string) {
-        prisma.uV.update({
-            where: {
-                id: uvId
-            },
-            data: {
-                members: { connect: { id: this.prismaUser.id } }
-            }
-        })
     }
 }
