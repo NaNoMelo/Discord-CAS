@@ -4,7 +4,7 @@ import {
     CommandInteraction,
 } from "discord.js"
 
-type RunFunction = (interaction: CommandInteraction) => any
+type RunFunction = (interaction: CommandInteraction) => void
 
 type AutocompleteFunction = (interaction: AutocompleteInteraction) => any
 

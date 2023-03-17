@@ -46,6 +46,11 @@ export class UV {
         })
     }
 
+    //Getters
+
+    //Setters
+
+    //Methods
     async addMember(userID: string) {
         prisma.uV.update({
             where: {
@@ -53,6 +58,29 @@ export class UV {
             },
             data: {
                 members: { connect: { id: userID } }
+            }
+        })
+    }
+
+    async removeMember(userID: string) {
+        prisma.uV.update({
+            where: {
+                id: this.prismaUV.id
+            },
+            data: {
+                members: { disconnect: { id: userID } }
+            }
+        })
+    }
+
+    async getMembers() {
+        return prisma.profile.findMany({
+            where: {
+                uvs: {
+                    some: {
+                        id: this.prismaUV.id
+                    }
+                }
             }
         })
     }

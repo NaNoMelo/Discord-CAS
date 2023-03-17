@@ -1,7 +1,12 @@
-import { ApplicationCommandData, CommandInteraction } from "discord.js"
+import {
+    ApplicationCommandData,
+    CommandInteraction,
+    GuildMember
+} from "discord.js"
 import { Lang } from "../classes/Locale"
 import { Profile } from "../classes/Profile"
 import { Settings } from "../classes/Settings"
+import { UserRoleManager } from "../classes/UserRoleManager"
 
 const data: ApplicationCommandData = {
     name: "verify",
@@ -41,6 +46,15 @@ async function run(interaction: CommandInteraction): Promise<void> {
 
     if (user.authCode === interaction.options.getString("code", true)) {
         user.authed = true
+
+        if (interaction.inGuild() && settings?.verifiedRole) {
+            const userRoleManager = new UserRoleManager(settings.guildID)
+            userRoleManager.applyVerifiedRole(
+                await interaction.guild!.members.fetch(
+                    interaction.member.user.id
+                )
+            )
+        }
 
         await user
             .save()

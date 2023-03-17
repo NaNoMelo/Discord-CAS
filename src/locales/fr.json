@@ -26,6 +26,10 @@
         },
         "format": {
             "set": "Le format de pseudo des personnes authentifiées sur ce serveur est désormais \"{format}\" !\nExemple : **{example}**"
+        },
+        "roles": {
+            "applied": "Roles appliqués :\n\tVérifié : {verified}\n\tPromo : {promo}\n\tUV : {uv}",
+            "result": "{applied} roles ajoutés, {removed} roles retirés"
         }
     },
     "welcome": {

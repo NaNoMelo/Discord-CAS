@@ -1,4 +1,6 @@
 import { PrismaClient, GuildConfig, PromoRole, UVRole } from "@prisma/client"
+import { GuildMember } from "discord.js"
+import { client } from ".."
 const prisma = new PrismaClient()
 
 export class Settings {
@@ -44,6 +46,9 @@ export class Settings {
     }
 
     //Getters
+    get guildID(): string {
+        return this.guildConfig.id
+    }
     get nicknameFormat(): string {
         return this.guildConfig.nicknameFormat
     }
@@ -60,4 +65,19 @@ export class Settings {
     }
 
     //Methods
+    async getPromoRoles(): Promise<PromoRole[]> {
+        return prisma.promoRole.findMany({
+            where: {
+                guildId: this.guildID
+            }
+        })
+    }
+
+    async getUVRoles(): Promise<UVRole[]> {
+        return prisma.uVRole.findMany({
+            where: {
+                guildId: this.guildID
+            }
+        })
+    }
 }

@@ -2,7 +2,7 @@ import { randomInt } from "crypto"
 import { mailer } from "../classes/Mail"
 import { CasMail } from "./Mail"
 import { Collection } from "discord.js"
-import { PrismaClient, Profile as PrismaProfile } from "@prisma/client"
+import { PrismaClient, Profile as PrismaProfile, UV } from "@prisma/client"
 const prisma = new PrismaClient()
 
 export class Profile {
@@ -17,7 +17,10 @@ export class Profile {
             })
             .then((userData) => {
                 if (userData) {
-                    if (Date.now() - userData.authCodeCreation.getTime() > 1000 * 60 * 10) {
+                    if (
+                        Date.now() - userData.authCodeCreation.getTime() >
+                        1000 * 60 * 10
+                    ) {
                         userData.authCode = null
                     }
                     return Promise.resolve(new Profile(userData))
@@ -139,5 +142,17 @@ export class Profile {
                 }
             }
         )
+    }
+
+    async getUVs(): Promise<UV[]> {
+        return prisma.uV.findMany({
+            where: {
+                members: {
+                    some: {
+                        id: this.prismaUser.id
+                    }
+                }
+            }
+        })
     }
 }

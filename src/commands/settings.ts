@@ -2,6 +2,7 @@ import { ApplicationCommandData, CommandInteraction } from "discord.js"
 import { Lang } from "../classes/Locale"
 import { Profile } from "../classes/Profile"
 import { Settings } from "../classes/Settings"
+import { UserRoleManager } from "../classes/UserRoleManager"
 
 const data: ApplicationCommandData = {
     name: "settings",
@@ -35,6 +36,12 @@ const data: ApplicationCommandData = {
                     required: true
                 }
             ]
+        },
+        {
+            name: "apply roles",
+            description:
+                "Applique le role vérifié ainsi que les roles de promo et d'UVs aux membres du serveur",
+            type: "SUB_COMMAND"
         }
     ],
     dmPermission: false
@@ -86,6 +93,32 @@ async function run(interaction: CommandInteraction): Promise<void> {
 
         case "promo":
             const promo = interaction.options.getString("promo", true)
+            break
+        case "apply roles":
+            const userRoleManager = new UserRoleManager(settings.guildID)
+            const verifiedRoles = await userRoleManager
+                .applyVerifiedRole()
+                .then((result) =>
+                    Lang.get("settings.roles.applied", "fr", result)
+                )
+            const promoRoles = await userRoleManager
+                .applyPromoRoles()
+                .then((result) =>
+                    Lang.get("settings.roles.applied", "fr", result)
+                )
+            const uvRoles = await userRoleManager
+                .applyUVRoles()
+                .then((result) =>
+                    Lang.get("settings.roles.applied", "fr", result)
+                )
+            interaction.followUp(
+                Lang.get("settings.roles.applied", Lang.defaultLang, {
+                    verified: verifiedRoles,
+                    promo: promoRoles,
+                    uv: uvRoles
+                })
+            )
+            break
     }
 
     await settings.save()
