@@ -28,8 +28,8 @@
             "set": "Le format de pseudo des personnes authentifiées sur ce serveur est désormais \"{format}\" !\nExemple : **{example}**"
         },
         "roles": {
-            "applied": "Roles appliqués :\n\tVérifié : {verified}\n\tPromo : {promo}\n\tUV : {uv}",
-            "result": "{applied} roles ajoutés, {removed} roles retirés"
+            "applied": "Roles appliqués avec succès !",
+            "error": "Une erreur est survenue lors de l'application des rôles !"
         }
     },
     "welcome": {
@@ -57,6 +57,11 @@
         "error": {
             "code": "Le code saisi est invalide !",
             "notFound": "L'UV {uv} n'est pas dans la base de données !"
+        }
+    },
+    "edt": {
+        "error": {
+            "format": "Le format de l'emploi du temps est invalide !"
         }
     }
 }

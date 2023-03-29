@@ -38,7 +38,7 @@ const data: ApplicationCommandData = {
             ]
         },
         {
-            name: "apply roles",
+            name: "apply-roles",
             description:
                 "Applique le role vérifié ainsi que les roles de promo et d'UVs aux membres du serveur",
             type: "SUB_COMMAND"
@@ -94,30 +94,24 @@ async function run(interaction: CommandInteraction): Promise<void> {
         case "promo":
             const promo = interaction.options.getString("promo", true)
             break
-        case "apply roles":
+        case "apply-roles":
             const userRoleManager = new UserRoleManager(settings.guildID)
-            const verifiedRoles = await userRoleManager
-                .applyVerifiedRole()
-                .then((result) =>
-                    Lang.get("settings.roles.applied", "fr", result)
-                )
-            const promoRoles = await userRoleManager
-                .applyPromoRoles()
-                .then((result) =>
-                    Lang.get("settings.roles.applied", "fr", result)
-                )
-            const uvRoles = await userRoleManager
-                .applyUVRoles()
-                .then((result) =>
-                    Lang.get("settings.roles.applied", "fr", result)
-                )
-            interaction.followUp(
-                Lang.get("settings.roles.applied", Lang.defaultLang, {
-                    verified: verifiedRoles,
-                    promo: promoRoles,
-                    uv: uvRoles
+            const promises: Promise<void>[] = []
+            promises.push(userRoleManager.applyVerifiedRole())
+            promises.push(userRoleManager.applyPromoRoles())
+            promises.push(userRoleManager.applyUVRoles())
+            Promise.all(promises)
+                .then(() => {
+                    interaction.followUp(
+                        Lang.get("settings.roles.applied", Lang.defaultLang)
+                    )
                 })
-            )
+                .catch(() => {
+                    interaction.followUp(
+                        Lang.get("settings.roles.error", Lang.defaultLang)
+                    )
+                })
+
             break
     }
 

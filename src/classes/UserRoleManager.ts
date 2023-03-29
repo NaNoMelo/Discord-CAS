@@ -24,22 +24,20 @@ export class UserRoleManager {
         const role = this.guild.roles.cache.get(guildSettings.verifiedRole)
         if (!role) return Promise.reject(new Error("Verified role not found"))
 
-        let applied = 0,
-            removed = 0
         const members = member ? [member] : await this.guild.members.fetch()
-        members.forEach(async (member) => {
-            const profile = await Profile.get(member.id).catch(() => null)
-            if (!profile) return
-            if (profile.authed) {
-                if (!member.roles.cache.has(role.id))
-                    member.roles.add(role).then(() => applied++)
+        members.forEach(async (m) => {
+            const profile = await Profile.get(m.id).catch(() => null)
+            if (profile?.authed) {
+                if (!m.roles.cache.has(role.id)) {
+                    m.roles.add(role)
+                }
             } else {
-                if (member.roles.cache.has(role.id))
-                    member.roles.remove(role).then(() => removed++)
+                if (m.roles.cache.has(role.id)) {
+                    m.roles.remove(role)
+                }
             }
         })
-
-        return Promise.resolve({ applied: applied, removed: removed })
+        return Promise.resolve()
     }
 
     async applyPromoRoles(member?: GuildMember) {
@@ -58,26 +56,25 @@ export class UserRoleManager {
             promoRoles.set(promoRole.promo, role)
         }
 
-        let applied = 0,
-            removed = 0
         const members = member ? [member] : await this.guild.members.fetch()
-        members.forEach(async (member) => {
-            const profile = await Profile.get(member.id).catch(() => null)
-            if (!profile) return
-            if (profile.promo) {
+        members.forEach(async (m) => {
+            const profile = await Profile.get(m.id).catch(() => null)
+            if (profile?.promo) {
                 for (const [promo, role] of promoRoles) {
                     if (profile.promo === promo) {
-                        if (!member.roles.cache.has(role.id))
-                            member.roles.add(role).then(() => applied++)
+                        if (!m.roles.cache.has(role.id)) m.roles.add(role)
                     } else {
-                        if (member.roles.cache.has(role.id))
-                            member.roles.remove(role).then(() => removed++)
+                        if (m.roles.cache.has(role.id)) m.roles.remove(role)
                     }
+                }
+            } else {
+                for (const [, role] of promoRoles) {
+                    if (m.roles.cache.has(role.id)) m.roles.remove(role)
                 }
             }
         })
 
-        return Promise.resolve({ applied: applied, removed: removed })
+        return Promise.resolve()
     }
 
     async applyUVRoles(member?: GuildMember) {
@@ -95,24 +92,25 @@ export class UserRoleManager {
             uvRoles.set(uvRole.uvName, role)
         }
 
-        let applied = 0,
-            removed = 0
         const members = member ? [member] : await this.guild.members.fetch()
-        members.forEach(async (member) => {
-            const profile = await Profile.get(member.id).catch(() => null)
-            if (!profile) return
-            const uvs = await profile.getUVs()
-            for (const [uvName, role] of uvRoles) {
-                if (uvs.find((uv) => uv.name === uvName)) {
-                    if (!member.roles.cache.has(role.id))
-                        member.roles.add(role).then(() => applied++)
-                } else {
-                    if (member.roles.cache.has(role.id))
-                        member.roles.remove(role).then(() => removed++)
+        members.forEach(async (m) => {
+            const profile = await Profile.get(m.id).catch(() => null)
+            if (profile) {
+                const uvs = await profile.getUVs()
+                for (const [uvName, role] of uvRoles) {
+                    if (uvs.find((uv) => uv.name === uvName)) {
+                        if (!m.roles.cache.has(role.id)) m.roles.add(role)
+                    } else {
+                        if (m.roles.cache.has(role.id)) m.roles.remove(role)
+                    }
+                }
+            } else {
+                for (const [, role] of uvRoles) {
+                    if (m.roles.cache.has(role.id)) m.roles.remove(role)
                 }
             }
         })
-        
-        return Promise.resolve({ applied: applied, removed: removed })
+
+        return Promise.resolve()
     }
 }
