@@ -1,4 +1,4 @@
-import { ApplicationCommandData, CommandInteraction } from "discord.js"
+import { ApplicationCommandData, CommandInteraction, User } from "discord.js"
 import { PrismaClient } from "@prisma/client"
 import { Lang } from "../classes/Locale"
 import { Profile } from "../classes/Profile"
@@ -44,7 +44,15 @@ const data: ApplicationCommandData = {
         {
             name: "list",
             description: "List all the UVs",
-            type: "SUB_COMMAND"
+            type: "SUB_COMMAND",
+            options: [
+                {
+                    name: "user",
+                    description: "member to list the UVs of",
+                    type: "USER",
+                    required: false
+                }
+            ]
         },
         {
             name: "members",
@@ -62,6 +70,19 @@ const data: ApplicationCommandData = {
         {
             name: "join",
             description: "Joins an UV",
+            type: "SUB_COMMAND",
+            options: [
+                {
+                    name: "code",
+                    description: "Code of the UV",
+                    type: "STRING",
+                    required: true
+                }
+            ]
+        },
+        {
+            name: "leave",
+            description: "Leaves an UV",
             type: "SUB_COMMAND",
             options: [
                 {
@@ -91,7 +112,7 @@ async function run(interaction: CommandInteraction): Promise<void> {
                 return
             }
             name = interaction.options.getString("name", true)
-            code = interaction.options.getString("code", true)
+            code = interaction.options.getString("code", true).toUpperCase()
             if (code.match(/^[A-Z]{2}[0-9A-Z]{2}$/)) {
                 if (await prisma.uV.findUnique({ where: { id: code } })) {
                     interaction.followUp(
@@ -118,7 +139,7 @@ async function run(interaction: CommandInteraction): Promise<void> {
                 interaction.followUp(Lang.get("error.permission", "fr"))
                 return
             }
-            code = interaction.options.getString("code", true)
+            code = interaction.options.getString("code", true).toUpperCase()
             if (code.match(/^[A-Z]{2}[0-9A-Z]{2}$/)) {
                 if (await prisma.uV.findUnique({ where: { id: code } })) {
                     await prisma.uV.delete({ where: { id: code } })
@@ -127,7 +148,7 @@ async function run(interaction: CommandInteraction): Promise<void> {
                     )
                 } else {
                     interaction.followUp(
-                        Lang.get("uv.remove.notFound", "fr", { uv: code })
+                        Lang.get("uv.error.notFound", "fr", { uv: code })
                     )
                 }
             } else {
@@ -136,8 +157,26 @@ async function run(interaction: CommandInteraction): Promise<void> {
             break
 
         case "list":
-            const uvs = await prisma.uV.findMany()
-            if (uvs) {
+            let uvs: UV[], memberProfile: Profile | void
+
+            const member = interaction.options.getUser("user", false)
+            if (member) {
+                memberProfile = await Profile.get(member.id).catch(() => {
+                    interaction.followUp(
+                        Lang.get("uv.error.notAuthed", "fr", {
+                            user: member.username
+                        })
+                    )
+                })
+                if (!memberProfile) return
+                uvs = await memberProfile.getUVs()
+            } else {
+                uvs = await prisma.uV
+                    .findMany()
+                    .then((uvs) => uvs.map((uv) => new UV(uv)))
+            }
+
+            if (uvs.length > 0) {
                 let text = ""
                 for (const uv of uvs) {
                     text += `__**${uv.id}:**__\t${uv.name}\n`
@@ -151,7 +190,7 @@ async function run(interaction: CommandInteraction): Promise<void> {
             break
 
         case "members":
-            code = interaction.options.getString("code", true)
+            code = interaction.options.getString("code", true).toUpperCase()
             if (code.match(/^[A-Z]{2}[0-9A-Z]{2}$/)) {
                 const members = await prisma.uV.findUnique({
                     where: { id: code },
@@ -183,7 +222,7 @@ async function run(interaction: CommandInteraction): Promise<void> {
             break
 
         case "join":
-            code = interaction.options.getString("code", true)
+            code = interaction.options.getString("code", true).toUpperCase()
 
             uv = await UV.get(code).catch(() => {
                 interaction.followUp(
@@ -193,10 +232,28 @@ async function run(interaction: CommandInteraction): Promise<void> {
             })
             if (!uv) return
             await uv
-                .addMember(code)
+                .addMember(user.id)
                 .then(() =>
                     interaction.followUp(
                         Lang.get("uv.join.success", "fr", { uv: code })
+                    )
+                )
+
+            break
+        case "leave":
+            code = interaction.options.getString("code", true).toUpperCase()
+
+            uv = await UV.get(code).catch(() => {
+                interaction.followUp(
+                    Lang.get("uv.error.notFound", "fr", { uv: code })
+                )
+            })
+            if (!uv) return
+            await uv
+                .removeMember(user.id)
+                .then(() =>
+                    interaction.followUp(
+                        Lang.get("uv.leave.success", "fr", { uv: code })
                     )
                 )
 

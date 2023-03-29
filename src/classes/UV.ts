@@ -47,12 +47,18 @@ export class UV {
     }
 
     //Getters
+    get id(): string {
+        return this.prismaUV.id
+    }
+    get name(): string {
+        return this.prismaUV.name
+    }
 
     //Setters
 
     //Methods
     async addMember(userID: string) {
-        prisma.uV.update({
+        return prisma.uV.update({
             where: {
                 id: this.prismaUV.id
             },
@@ -63,7 +69,7 @@ export class UV {
     }
 
     async removeMember(userID: string) {
-        prisma.uV.update({
+        return prisma.uV.update({
             where: {
                 id: this.prismaUV.id
             },

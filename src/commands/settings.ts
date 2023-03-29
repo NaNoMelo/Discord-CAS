@@ -59,16 +59,15 @@ async function run(interaction: CommandInteraction): Promise<void> {
             interaction.followUp(Lang.get("error.notAuthed", Lang.defaultLang))
         }
     )
-    if (!user) return
+
+    if (!user?.admin) {
+        interaction.followUp(Lang.get("error.permission", Lang.defaultLang))
+        return
+    }
 
     const settings: Settings = await Settings.get(interaction.guildId).catch(
         () => Settings.create(interaction.guildId)
     )
-
-    if (!user.admin) {
-        interaction.followUp(Lang.get("error.permission", Lang.defaultLang))
-        return
-    }
 
     switch (interaction.options.getSubcommand()) {
         case "role":

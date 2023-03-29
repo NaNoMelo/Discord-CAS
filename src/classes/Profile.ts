@@ -1,8 +1,9 @@
 import { randomInt } from "crypto"
 import { mailer } from "../classes/Mail"
+import { UV } from "../classes/UV"
 import { CasMail } from "./Mail"
 import { Collection } from "discord.js"
-import { PrismaClient, Profile as PrismaProfile, UV } from "@prisma/client"
+import { PrismaClient, Profile as PrismaProfile } from "@prisma/client"
 const prisma = new PrismaClient()
 
 export class Profile {
@@ -63,6 +64,9 @@ export class Profile {
     }
 
     //Getters
+    get id(): string {
+        return this.prismaUser.id
+    }
     get authed(): boolean {
         return this.prismaUser.authed
     }
@@ -145,14 +149,16 @@ export class Profile {
     }
 
     async getUVs(): Promise<UV[]> {
-        return prisma.uV.findMany({
-            where: {
-                members: {
-                    some: {
-                        id: this.prismaUser.id
+        return prisma.uV
+            .findMany({
+                where: {
+                    members: {
+                        some: {
+                            id: this.prismaUser.id
+                        }
                     }
                 }
-            }
-        })
+            })
+            .then((uvs) => uvs.map((uv) => new UV(uv)))
     }
 }

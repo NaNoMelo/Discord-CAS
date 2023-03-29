@@ -54,9 +54,13 @@
         "join": {
             "success": "Vous avez bien été inscrit à l'UV {uv} !"
         },
+        "leave": {
+            "success": "Vous avez bien été désinscrit de l'UV {uv} !"
+        },
         "error": {
             "code": "Le code saisi est invalide !",
-            "notFound": "L'UV {uv} n'est pas dans la base de données !"
+            "notFound": "L'UV {uv} n'est pas dans la base de données !",
+            "notAuthed": "L'utilisateur {user} n'est pas authentifié !"
         }
     },
     "edt": {
