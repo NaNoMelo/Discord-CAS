@@ -106,6 +106,9 @@ export class Profile {
     set authed(authed: boolean) {
         this.prismaUser.authed = authed
     }
+    set promo(promo: number | null) {
+        this.prismaUser.promo = promo
+    }
 
     //Methods
     async genAuthCode() {

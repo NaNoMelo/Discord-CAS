@@ -52,7 +52,8 @@
             "list": "Liste des membres inscrits à l'UV {uv} :\n{list}"
         },
         "join": {
-            "success": "Vous avez bien été inscrit à l'UV {uv} !"
+            "success": "Vous avez bien été inscrit à l'UV {uv} !",
+            "alreadyJoined": "Vous êtes déjà inscrit à l'UV {uv} !"
         },
         "leave": {
             "success": "Vous avez bien été désinscrit de l'UV {uv} !"
@@ -62,6 +63,10 @@
             "notFound": "L'UV {uv} n'est pas dans la base de données !",
             "notAuthed": "L'utilisateur {user} n'est pas authentifié !"
         }
+    },
+    "promo": {
+        "set": "Votre promo a bien été changée en **{promo}** !",
+        "members": "Liste des membres de la promo **{promo}** :\n{list}"
     },
     "edt": {
         "error": {

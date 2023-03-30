@@ -1,4 +1,9 @@
-import { ApplicationCommandData, CommandInteraction, User } from "discord.js"
+import {
+    ApplicationCommandData,
+    AutocompleteInteraction,
+    CommandInteraction,
+    User
+} from "discord.js"
 import { PrismaClient } from "@prisma/client"
 import { Lang } from "../classes/Locale"
 import { Profile } from "../classes/Profile"
@@ -37,7 +42,8 @@ const data: ApplicationCommandData = {
                     name: "code",
                     description: "Code of the UV",
                     type: "STRING",
-                    required: true
+                    required: true,
+                    autocomplete: true
                 }
             ]
         },
@@ -76,7 +82,8 @@ const data: ApplicationCommandData = {
                     name: "code",
                     description: "Code of the UV",
                     type: "STRING",
-                    required: true
+                    required: true,
+                    autocomplete: true
                 }
             ]
         },
@@ -89,7 +96,8 @@ const data: ApplicationCommandData = {
                     name: "code",
                     description: "Code of the UV",
                     type: "STRING",
-                    required: true
+                    required: true,
+                    autocomplete: true
                 }
             ]
         }
@@ -140,19 +148,19 @@ async function run(interaction: CommandInteraction): Promise<void> {
                 return
             }
             code = interaction.options.getString("code", true).toUpperCase()
-            if (code.match(/^[A-Z]{2}[0-9A-Z]{2}$/)) {
-                if (await prisma.uV.findUnique({ where: { id: code } })) {
-                    await prisma.uV.delete({ where: { id: code } })
-                    interaction.followUp(
-                        Lang.get("uv.remove.success", "fr", { uv: code })
-                    )
-                } else {
-                    interaction.followUp(
-                        Lang.get("uv.error.notFound", "fr", { uv: code })
-                    )
-                }
-            } else {
+            if (!code.match(/^[A-Z]{2}[0-9A-Z]{2}$/)) {
                 interaction.followUp(Lang.get("uv.error.code", "fr"))
+                return
+            }
+            if (await prisma.uV.findUnique({ where: { id: code } })) {
+                await prisma.uV.delete({ where: { id: code } })
+                interaction.followUp(
+                    Lang.get("uv.remove.success", "fr", { uv: code })
+                )
+            } else {
+                interaction.followUp(
+                    Lang.get("uv.error.notFound", "fr", { uv: code })
+                )
             }
             break
 
@@ -191,39 +199,41 @@ async function run(interaction: CommandInteraction): Promise<void> {
 
         case "members":
             code = interaction.options.getString("code", true).toUpperCase()
-            if (code.match(/^[A-Z]{2}[0-9A-Z]{2}$/)) {
-                const members = await prisma.uV.findUnique({
-                    where: { id: code },
-                    include: { members: true }
-                })
-                if (members) {
-                    let text = ""
-                    for (const member of members.members) {
-                        text += `${member.firstName} ${member.lastName} ${
-                            member.nickname
-                                ? "*(aka: " + member.nickname + ")*"
-                                : ""
-                        }\n`
-                    }
-                    interaction.followUp(
-                        Lang.get("uv.members.list", "fr", {
-                            uv: code,
-                            list: text
-                        })
-                    )
-                } else {
-                    interaction.followUp(
-                        Lang.get("uv.members.empty", "fr", { uv: code })
-                    )
-                }
-            } else {
+            if (!code.match(/^[A-Z]{2}[0-9A-Z]{2}$/)) {
                 interaction.followUp(Lang.get("uv.error.code", "fr"))
+                return
+            }
+            const members = await prisma.profile.findMany({
+                where: { uvs: { some: { id: code } } }
+            })
+            if (members) {
+                let text = ""
+                for (const member of members) {
+                    text += `\t${member.firstName} ${member.lastName} ${
+                        member.nickname
+                            ? "*(aka: " + member.nickname + ")*"
+                            : ""
+                    }\n`
+                }
+                interaction.followUp(
+                    Lang.get("uv.members.list", "fr", {
+                        uv: code,
+                        list: text
+                    })
+                )
+            } else {
+                interaction.followUp(
+                    Lang.get("uv.members.empty", "fr", { uv: code })
+                )
             }
             break
 
         case "join":
             code = interaction.options.getString("code", true).toUpperCase()
-
+            if (!code.match(/^[A-Z]{2}[0-9A-Z]{2}$/)) {
+                interaction.followUp(Lang.get("uv.error.code", "fr"))
+                return
+            }
             uv = await UV.get(code).catch(() => {
                 interaction.followUp(
                     Lang.get("uv.error.notFound", "fr", { uv: code })
@@ -231,6 +241,12 @@ async function run(interaction: CommandInteraction): Promise<void> {
                 return
             })
             if (!uv) return
+            if ((await user.getUVs()).some((uv) => uv.id === code)) {
+                interaction.followUp(
+                    Lang.get("uv.join.alreadyJoined", "fr", { uv: code })
+                )
+                return
+            }
             await uv
                 .addMember(user.id)
                 .then(() =>
@@ -242,7 +258,10 @@ async function run(interaction: CommandInteraction): Promise<void> {
             break
         case "leave":
             code = interaction.options.getString("code", true).toUpperCase()
-
+            if (!code.match(/^[A-Z]{2}[0-9A-Z]{2}$/)) {
+                interaction.followUp(Lang.get("uv.error.code", "fr"))
+                return
+            }
             uv = await UV.get(code).catch(() => {
                 interaction.followUp(
                     Lang.get("uv.error.notFound", "fr", { uv: code })
@@ -261,4 +280,72 @@ async function run(interaction: CommandInteraction): Promise<void> {
     }
 }
 
-module.exports = { data, run }
+async function autocomplete(
+    interaction: AutocompleteInteraction
+): Promise<void> {
+    switch (interaction.options.getSubcommand()) {
+        case "join":
+            interaction.respond(
+                (
+                    await prisma.uV.findMany({
+                        where: {
+                            members: { none: { id: interaction.user.id } }
+                        }
+                    })
+                )
+                    .filter((uv) =>
+                        uv.id.startsWith(
+                            interaction.options
+                                .getString("code", true)
+                                .toUpperCase()
+                        )
+                    )
+                    .map((uv) => ({
+                        name: `${uv.id} : ${uv.name}`,
+                        value: uv.id
+                    }))
+            )
+            break
+        case "leave":
+            interaction.respond(
+                (
+                    await prisma.uV.findMany({
+                        where: {
+                            members: { some: { id: interaction.user.id } }
+                        }
+                    })
+                )
+                    .filter((uv) =>
+                        uv.id.startsWith(
+                            interaction.options
+                                .getString("code", true)
+                                .toUpperCase()
+                        )
+                    )
+                    .map((uv) => ({
+                        name: `${uv.id} : ${uv.name}`,
+                        value: uv.id
+                    }))
+            )
+            break
+        case "remove":
+            console.log("remove")
+            interaction.respond(
+                (await prisma.uV.findMany())
+                    .filter((uv) =>
+                        uv.id.startsWith(
+                            interaction.options
+                                .getString("code", true)
+                                .toUpperCase()
+                        )
+                    )
+                    .map((uv) => ({
+                        name: `${uv.id} : ${uv.name}`,
+                        value: uv.id
+                    }))
+            )
+            break
+    }
+}
+
+module.exports = { data, run, autocomplete }
