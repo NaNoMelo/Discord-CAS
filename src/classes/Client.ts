@@ -9,6 +9,7 @@ import glob from "glob"
 import { CommandType } from "../typings/Command"
 import { Event } from "./Events"
 import path from "path"
+import { readFileSync } from "fs"
 
 const globPromise = promisify(glob)
 
@@ -23,7 +24,7 @@ export class ExtendedClient extends Client {
 	async start() {
 		this.registerCommands()
 		this.registerEvents()
-		this.login(process.env.botToken)
+		this.login(process.env.environement == "docker" ? readFileSync("/run/secrets/botToken").toString() : process.env.botToken)
 	}
 
 	async setCommands(
