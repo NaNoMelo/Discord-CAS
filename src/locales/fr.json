@@ -1,32 +1,78 @@
 {
-	"error": {
-		"permission": "Vous n'avez pas la permission s'utiliser cette commande !",
-		"notAuthed": "Vous n'êtes pas authentifié !"
-	},
-	"cas": {
-		"invalidMail": "Adresse mail invalide ! Veuillez saisir votre adresse mail {schoolName} !",
-		"alreadyAuthed": "Vous êtes déjà authentifié !",
-		"mailSent": "Un mail d'authentification vous a été envoyé\n*Le code d'authentification expirera dans 10mn*",
-		"auth": {
-			"notStarted": "Merci de commencer l'authentification avec la commande /cas",
-			"success": "Vous avez bien été authentifié !",
-			"expired": "Votre code d'authentification a expiré ou n'a pas été créé !\nMerci de recommencer l'authentification avec la commande /cas",
-			"invalidCode": "Le code saisi ne correspond pas avec celui qui vous a été envoyé !"
-		}
-	},
-	"nickname": {
-		"tooLong": "Votre pseudo est trop long, il doit faire moins de 32 caractères !",
-		"set": "Votre pseudo a bien été changé en **{nickname}** !"
-	},
-	"settings": {
-		"role": {
-			"set": "Le rôle {role} sera à présent utilisé pour les personnes authentifiées sur ce serveur !"
-		},
-		"format": {
-			"set": "Le format de pseudo des personnes authentifiées sur ce serveur est désormais \"{format}\" !\nExemple : **{example}**"
-		}
-	},
-	"welcome": {
-		"message": "Bienvenue sur le serveur {serverName} !\nPour accéder à l'entièreté du serveur, vous devrez vous authentifier avec votre adresse mail {schoolName}.\nPour cela, merci de la saisir ci-dessous. Vous recevrez un mail d'authentification.\n\n*Si vous ne recevez pas de mail, merci de vérifier vos spams et de contacter un administrateur.*"
-	}
+    "error": {
+        "permission": "Vous n'avez pas la permission s'utiliser cette commande !",
+        "notAuthed": "Vous n'êtes pas authentifié !",
+        "notInGuild": "Cette commande ne peut être utilisée que dans un serveur !"
+    },
+    "cas": {
+        "invalidMail": "Adresse mail invalide ! Veuillez saisir votre adresse mail {schoolName} !",
+        "alreadyAuthed": "Vous êtes déjà authentifié !",
+        "mailSent": "Un mail d'authentification vous a été envoyé\n*Le code d'authentification expirera dans 10mn*",
+        "auth": {
+            "notStarted": "Merci de commencer l'authentification avec la commande /cas",
+            "success": "Vous avez bien été authentifié !",
+            "expired": "Votre code d'authentification a expiré ou n'a pas été créé !\nMerci de recommencer l'authentification avec la commande /cas",
+            "invalidCode": "Le code saisi ne correspond pas avec celui qui vous a été envoyé !"
+        },
+        "error": "Une erreur est survenue lors de l'authentification ! Merci réessayer ulterieurement.\n*Si le problème persiste, merci de contacter un administrateur.*"
+    },
+    "nickname": {
+        "tooLong": "Votre pseudo est trop long, il doit faire moins de 32 caractères !",
+        "set": "Votre pseudo a bien été changé en **{nickname}** !"
+    },
+    "settings": {
+        "role": {
+            "verified": "Le rôle {role} sera à présent utilisé pour les personnes authentifiées sur ce serveur !",
+            "promo": "Le rôle {role} sera à présent utilisé pour les personnes appartenant à la promo {promo} sur ce serveur !",
+            "uv": "Le rôle {role} sera à présent utilisé pour les personnes inscrites à l'UV {uv} sur ce serveur !"
+        },
+        "format": {
+            "set": "Le format de pseudo des personnes authentifiées sur ce serveur est désormais \"{format}\" !\nExemple : **{example}**"
+        },
+        "roles": {
+            "applied": "Roles appliqués avec succès !",
+            "error": "Une erreur est survenue lors de l'application des rôles !"
+        }
+    },
+    "welcome": {
+        "message": "Bienvenue sur le serveur {serverName} !\nPour accéder à l'entièreté du serveur, vous devrez vous authentifier avec votre adresse mail {schoolName}.\nPour cela, merci de la saisir ci-dessous. Vous recevrez un mail d'authentification.\n\n*Si vous ne recevez pas de mail, merci de vérifier vos spams et de contacter un administrateur.*"
+    },
+    "uv": {
+        "add": {
+            "success": "L'UV {uv} a bien été ajoutée à la base de données !",
+            "alreadyAdded": "L'UV {uv} est déjà dans la base de données !"
+        },
+        "remove": {
+            "success": "L'UV {uv} a bien été supprimée de la base de données !"
+        },
+        "list": {
+            "empty": "Aucune UV n'est enregistrée dans la base de données !",
+            "list": "Liste des UVs enregistrées dans la base de données :\n{list}"
+        },
+        "members": {
+            "empty": "Aucun membre n'est inscrit à l'UV {uv} !",
+            "list": "Liste des membres inscrits à l'UV {uv} :\n{list}"
+        },
+        "join": {
+            "success": "Vous avez bien été inscrit à l'UV {uv} !",
+            "alreadyJoined": "Vous êtes déjà inscrit à l'UV {uv} !"
+        },
+        "leave": {
+            "success": "Vous avez bien été désinscrit de l'UV {uv} !"
+        },
+        "error": {
+            "code": "Le code saisi est invalide !",
+            "notFound": "L'UV {uv} n'est pas dans la base de données !",
+            "notAuthed": "L'utilisateur {user} n'est pas authentifié !"
+        }
+    },
+    "promo": {
+        "set": "Votre promo a bien été changée en **{promo}** !",
+        "members": "Liste des membres de la promo **{promo}** :\n{list}"
+    },
+    "edt": {
+        "error": {
+            "format": "Le format de l'emploi du temps est invalide !"
+        }
+    }
 }

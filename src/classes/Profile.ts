@@ -1,137 +1,167 @@
 import { randomInt } from "crypto"
 import { mailer } from "../classes/Mail"
-import { Mail } from "./Mail"
-import fs from "fs"
-import { readFile } from "node:fs/promises"
-import { SendMailOptions } from "nodemailer"
-import { Crypto } from "./Crypto"
+import { UV } from "../classes/UV"
+import { CasMail } from "./Mail"
 import { Collection } from "discord.js"
+import { PrismaClient, Profile as PrismaProfile } from "@prisma/client"
+const prisma = new PrismaClient()
 
 export class Profile {
-	mail: string
-	discordID: string
-	promo?: number | "prof"
-	authCode?: string
-	authCodeCreationDate?: number
-	firstName: string
-	lastName: string
-	nickname?: string
-	authed: boolean
+    constructor(private prismaUser: PrismaProfile) {}
 
-	constructor(mail: string, discordID: string) {
-		this.mail = mail
-		this.discordID = discordID
-		this.firstName = mail.slice(0, mail.indexOf(".")).toLowerCase()
-		this.firstName =
-			this.firstName.charAt(0).toUpperCase() + this.firstName.slice(1)
-		this.lastName = mail
-			.slice(mail.indexOf(".") + 1, mail.indexOf("@"))
-			.toLowerCase()
-		this.lastName =
-			this.lastName.charAt(0).toUpperCase() + this.lastName.slice(1)
-		this.authed = false
-	}
+    static async get(userID: string): Promise<Profile> {
+        return prisma.profile
+            .findUnique({
+                where: {
+                    id: userID
+                }
+            })
+            .then((userData) => {
+                if (userData) {
+                    if (
+                        Date.now() - userData.authCodeCreation.getTime() >
+                        1000 * 60 * 10
+                    ) {
+                        userData.authCode = null
+                    }
+                    return Promise.resolve(new Profile(userData))
+                } else {
+                    return Promise.reject(new Error("User not authed"))
+                }
+            })
+    }
 
-	static async get(userID: String) {
-		if (fs.existsSync(`${__dirname}/../data/${userID}.json`)) {
-			fs.writeFile(
-				`${__dirname}/../data/${userID}`,
-				Crypto.encrypt(
-					await readFile(`${__dirname}/../data/${userID}.json`, {
-						encoding: "utf8"
-					})
-				),
-				{ flag: "w+" },
-				(err) => {
-					if (err) {
-						console.log(err)
-					} else {
-						fs.rmSync(`${__dirname}/../data/${userID}.json`)
-					}
-				}
-			)
-		}
+    static async create(userID: string, mail: string): Promise<Profile> {
+        return new Profile(
+            await prisma.profile.create({
+                data: {
+                    id: userID,
+                    mail: mail,
+                    firstName: mail.slice(0, mail.indexOf(".")).toLowerCase(),
+                    lastName: mail
+                        .slice(mail.indexOf(".") + 1, mail.indexOf("@"))
+                        .toLowerCase()
+                }
+            })
+        )
+    }
 
-		if (fs.existsSync(`${__dirname}/../data/${userID}`)) {
-			let user = JSON.parse(
-				Crypto.decrypt(
-					await readFile(`${__dirname}/../data/${userID}`, {
-						encoding: "utf8"
-					})
-				)
-			)
-			user = Object.assign(new Profile("", ""), user)
-			if (user.authCode && user.authCodeCreationDate) {
-				if (Date.now() - user.authCodeCreationDate > 600000) {
-					user.authCode = undefined
-					user.authCodeCreationDate = undefined
-				}
-			}
-			return user
-		}
-	}
+    async save() {
+        return await prisma.profile.update({
+            where: {
+                id: this.prismaUser.id
+            },
+            data: this.prismaUser
+        })
+    }
 
-	async save() {
-		fs.writeFile(
-			`${__dirname}/../data/${this.discordID}`,
-			Crypto.encrypt(JSON.stringify(this)),
-			{ flag: "w+" },
-			(err) => {
-				if (err) {
-					console.log(err)
-				}
-			}
-		)
-	}
+    async delete() {
+        await prisma.profile.delete({
+            where: {
+                id: this.prismaUser.id
+            }
+        })
+    }
 
-	public async checkUniqueMail(mail : string) : Promise<boolean> {
-		let files = fs.readdirSync(`${__dirname}/../data/users`)
-		for (let file of files) {
-			let user = await Profile.get(file)
-			if (user.mail == mail) {
-				return false
-			}
-		}
-		return true
-	}
+    //Getters
+    get id(): string {
+        return this.prismaUser.id
+    }
+    get authed(): boolean {
+        return this.prismaUser.authed
+    }
+    get promo(): number | null {
+        return this.prismaUser.promo
+    }
+    get firstName(): string {
+        return this.prismaUser.firstName
+    }
+    get lastName(): string {
+        return this.prismaUser.lastName
+    }
+    get nickname(): string | null {
+        return this.prismaUser.nickname
+    }
+    get authCode(): string | null {
+        return this.prismaUser.authCode
+    }
+    get authCodeCreation(): Date | null {
+        return this.prismaUser.authCodeCreation
+    }
+    get admin(): boolean {
+        return this.prismaUser.admin
+    }
 
+    //Setters
+    set nickname(nickname: string | null) {
+        this.prismaUser.nickname = nickname
+    }
+    set mail(mail: string) {
+        if (mail.match(/^[a-zA-Z-]+\.[a-zA-Z-]+\d?@utbm\.fr$/)) {
+            this.prismaUser.mail = mail
+        } else {
+            throw new Error("Invalid mail")
+        }
+    }
+    set authed(authed: boolean) {
+        this.prismaUser.authed = authed
+    }
+    set promo(promo: number | null) {
+        this.prismaUser.promo = promo
+    }
 
-	async genAuthCode() {
-		let chars = "0123456789"
-		this.authCode = ""
-		for (let i = 0; i < 6; i++) {
-			this.authCode += chars[randomInt(0, chars.length)]
-		}
-		this.authCodeCreationDate = Date.now()
-	}
+    //Methods
+    async genAuthCode() {
+        let chars = "0123456789"
+        this.prismaUser.authCode = ""
+        for (let i = 0; i < 6; i++) {
+            this.prismaUser.authCode += chars[randomInt(0, chars.length)]
+        }
+        this.prismaUser.authCodeCreation = new Date()
+        await this.save()
+        return this.prismaUser.authCode
+    }
 
-	async sendAuthMail() {
-		await this.genAuthCode()
-		if (this.authCode) {
-			let info = await mailer.sendMail(
-				new Mail(this.mail, this.authCode) as SendMailOptions
-			)
-			return info
-		}
-	}
+    async sendAuthMail() {
+        return this.genAuthCode().then(
+            async (authCode) =>
+                await mailer.sendMail(
+                    new CasMail(this.prismaUser.mail, authCode)
+                )
+        )
+    }
 
-	public getNickname(nicknameFormat: string) {
-		let replacements = new Collection<string, string>()
-		replacements.set("firstname", this.firstName)
-		replacements.set("lastname", this.lastName)
-		replacements.set("nickname", this.nickname || "")
-		replacements.set("promo", this.promo?.toString() || "")
-		if (nicknameFormat)
-			return nicknameFormat.replace(
-				/{(\w+)}/g,
-				(match, placeholder: string) => {
-					let replacement = replacements.get(placeholder)
-					if (replacement) {
-						return replacement
-					} else {
-						return match
-					}
-				}
-			)
-	}
+    public getDiscordNick(nicknameFormat: string) {
+        let replacements = new Collection<string, string>()
+        replacements.set("firstname", this.prismaUser.firstName)
+        replacements.set("lastname", this.prismaUser.lastName)
+        replacements.set("nickname", this.prismaUser.nickname || "")
+        replacements.set("promo", this.prismaUser.promo?.toString() || "")
+
+        return nicknameFormat.replace(
+            /{(\w+)}/g,
+            (match, placeholder: string) => {
+                let replacement = replacements.get(placeholder)
+                if (replacement) {
+                    return replacement
+                } else {
+                    return match
+                }
+            }
+        )
+    }
+
+    async getUVs(): Promise<UV[]> {
+        return prisma.uV
+            .findMany({
+                where: {
+                    members: {
+                        some: {
+                            id: this.prismaUser.id
+                        }
+                    }
+                }
+            })
+            .then((uvs) => uvs.map((uv) => new UV(uv)))
+    }
 }
