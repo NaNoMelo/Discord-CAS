@@ -1,5 +1,3 @@
-import { BinaryLike } from "node:crypto"
-
 declare global {
 	namespace NodeJS {
 		interface ProcessEnv {
