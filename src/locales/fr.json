@@ -22,7 +22,9 @@
     },
     "settings": {
         "role": {
-            "set": "Le rôle {role} sera à présent utilisé pour les personnes authentifiées sur ce serveur !"
+            "verified": "Le rôle {role} sera à présent utilisé pour les personnes authentifiées sur ce serveur !",
+            "promo": "Le rôle {role} sera à présent utilisé pour les personnes appartenant à la promo {promo} sur ce serveur !",
+            "uv": "Le rôle {role} sera à présent utilisé pour les personnes inscrites à l'UV {uv} sur ce serveur !"
         },
         "format": {
             "set": "Le format de pseudo des personnes authentifiées sur ce serveur est désormais \"{format}\" !\nExemple : **{example}**"

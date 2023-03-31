@@ -80,4 +80,24 @@ export class Settings {
             }
         })
     }
+
+    async addPromoRole(role: string, promo: number) {
+        return await prisma.promoRole.create({
+            data: {
+                guildId: this.guildID,
+                role: role,
+                promo: promo
+            }
+        })
+    }
+
+    async addUvRole(role: string, uv: string) {
+        return await prisma.uVRole.create({
+            data: {
+                guildId: this.guildID,
+                role: role,
+                uvName: uv
+            }
+        })
+    }
 }

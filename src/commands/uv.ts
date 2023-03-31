@@ -121,24 +121,24 @@ async function run(interaction: CommandInteraction): Promise<void> {
             }
             name = interaction.options.getString("name", true)
             code = interaction.options.getString("code", true).toUpperCase()
-            if (code.match(/^[A-Z]{2}[0-9A-Z]{2}$/)) {
-                if (await prisma.uV.findUnique({ where: { id: code } })) {
-                    interaction.followUp(
-                        Lang.get("uv.add.alreadyAdded", "fr", { uv: code })
-                    )
-                } else {
-                    await prisma.uV.create({
-                        data: {
-                            id: code,
-                            name: name
-                        }
-                    })
-                    interaction.followUp(
-                        Lang.get("uv.add.success", "fr", { uv: code })
-                    )
-                }
-            } else {
+            if (!code.match(/^[A-Z]{2}[0-9A-Z]{2}$/)) {
                 interaction.followUp(Lang.get("uv.error.code", "fr"))
+                return
+            }
+            if (await prisma.uV.findUnique({ where: { id: code } })) {
+                interaction.followUp(
+                    Lang.get("uv.add.alreadyAdded", "fr", { uv: code })
+                )
+            } else {
+                await prisma.uV.create({
+                    data: {
+                        id: code,
+                        name: name
+                    }
+                })
+                interaction.followUp(
+                    Lang.get("uv.add.success", "fr", { uv: code })
+                )
             }
             break
 

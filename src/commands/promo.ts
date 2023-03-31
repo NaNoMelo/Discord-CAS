@@ -2,6 +2,7 @@ import { ApplicationCommandData, CommandInteraction } from "discord.js"
 import { Lang } from "../classes/Locale"
 import { Profile } from "../classes/Profile"
 import { PrismaClient } from "@prisma/client"
+import { UserRoleManager } from "../classes/UserRoleManager"
 const prisma = new PrismaClient()
 
 const data: ApplicationCommandData = {
@@ -49,6 +50,9 @@ async function run(interaction: CommandInteraction): Promise<void> {
             promo = interaction.options.getNumber("promo", true)
             user.promo = promo
             await user.save()
+            if (interaction.inGuild()) {
+                new UserRoleManager(interaction.guildId).applyPromoRoles(interaction.guild?.members.cache.get(interaction.user.id))
+            }
             interaction.followUp(
                 Lang.get("promo.set", "fr", {
                     promo: promo

@@ -98,7 +98,7 @@ export class UserRoleManager {
             if (profile) {
                 const uvs = await profile.getUVs()
                 for (const [uvName, role] of uvRoles) {
-                    if (uvs.find((uv) => uv.name === uvName)) {
+                    if (uvs.find((uv) => uv.id === uvName)) {
                         if (!m.roles.cache.has(role.id)) m.roles.add(role)
                     } else {
                         if (m.roles.cache.has(role.id)) m.roles.remove(role)

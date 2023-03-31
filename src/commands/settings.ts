@@ -1,15 +1,20 @@
-import { ApplicationCommandData, CommandInteraction } from "discord.js"
+import {
+    ApplicationCommandData,
+    CommandInteraction,
+    Role
+} from "discord.js"
 import { Lang } from "../classes/Locale"
 import { Profile } from "../classes/Profile"
 import { Settings } from "../classes/Settings"
 import { UserRoleManager } from "../classes/UserRoleManager"
+import { UV } from "../classes/UV"
 
 const data: ApplicationCommandData = {
     name: "settings",
     description: "Permet de modifier les paramètres du bot",
     options: [
         {
-            name: "role",
+            name: "verified-role",
             description:
                 "Modifier le rôle à attribuer aux personnes authentifiées",
             type: "SUB_COMMAND",
@@ -18,6 +23,45 @@ const data: ApplicationCommandData = {
                     name: "role",
                     description:
                         "Rôle à distribuer aux personnes authentifiées",
+                    type: "ROLE",
+                    required: true
+                }
+            ]
+        },
+        {
+            name: "promo-role",
+            description:
+                "Modifier le rôle à attribuer aux personnes d'une promo",
+            type: "SUB_COMMAND",
+            options: [
+                {
+                    name: "promo",
+                    description: "Promotion à laquelle attribuer le rôle",
+                    type: "NUMBER",
+                    required: true
+                },
+                {
+                    name: "role",
+                    description: "Rôle à attribuer aux personnes de la promo",
+                    type: "ROLE",
+                    required: true
+                }
+            ]
+        },
+        {
+            name: "uv-role",
+            description: "Modifier le rôle à attribuer aux personnes d'une UV",
+            type: "SUB_COMMAND",
+            options: [
+                {
+                    name: "uv",
+                    description: "UV à laquelle attribuer le rôle",
+                    type: "STRING",
+                    required: true
+                },
+                {
+                    name: "role",
+                    description: "Rôle à attribuer aux personnes de l'UV",
                     type: "ROLE",
                     required: true
                 }
@@ -59,8 +103,9 @@ async function run(interaction: CommandInteraction): Promise<void> {
             interaction.followUp(Lang.get("error.notAuthed", Lang.defaultLang))
         }
     )
+    if (!user) return
 
-    if (!user?.admin) {
+    if (!(await interaction.guild?.members.fetch(interaction.user.id))?.permissions.has("ADMINISTRATOR")) {
         interaction.followUp(Lang.get("error.permission", Lang.defaultLang))
         return
     }
@@ -68,14 +113,56 @@ async function run(interaction: CommandInteraction): Promise<void> {
     const settings: Settings = await Settings.get(interaction.guildId).catch(
         () => Settings.create(interaction.guildId)
     )
-
+    let role: Role | null
     switch (interaction.options.getSubcommand()) {
-        case "role":
-            const role = interaction.options.getRole("role", true)
+        case "verified-role":
+            role = await interaction.guild?.roles.fetch(
+                interaction.options.getRole("role", true).id
+            )!
+            if (!role) return
             settings.verifiedRole = role.id
             interaction.followUp(
-                Lang.get("settings.role.set", Lang.defaultLang, {
+                Lang.get("settings.role.verified", Lang.defaultLang, {
                     role: role.toString()
+                })
+            )
+            break
+
+        case "promo-role":
+            const promo = interaction.options.getNumber("promo", true)
+            role = await interaction.guild?.roles.fetch(
+                interaction.options.getRole("role", true).id
+            )!
+            if (!role) return
+            await settings.addPromoRole(role.id, promo)
+            interaction.followUp(
+                Lang.get("settings.role.promo", Lang.defaultLang, {
+                    role: role.toString(),
+                    promo: promo
+                })
+            )
+            break
+
+        case "uv-role":
+            const code = interaction.options.getString("uv", true)
+            if (!code.match(/^[A-Z]{2}[0-9A-Z]{2}$/)) {
+                interaction.followUp(Lang.get("uv.error.code", "fr"))
+                return
+            }
+            const uv = await UV.get(code).catch(() => {
+                interaction.followUp(Lang.get("uv.error.notFound", "fr"))
+                return
+            })
+            if (!uv) return
+            role = await interaction.guild?.roles.fetch(
+                interaction.options.getRole("role", true).id
+            )!
+            if (!role) return
+            await settings.addUvRole(role.id, uv.id)
+            interaction.followUp(
+                Lang.get("settings.role.uv", Lang.defaultLang, {
+                    role: role.toString(),
+                    uv: uv.id
                 })
             )
             break
@@ -90,9 +177,6 @@ async function run(interaction: CommandInteraction): Promise<void> {
             )
             break
 
-        case "promo":
-            const promo = interaction.options.getString("promo", true)
-            break
         case "apply-roles":
             const userRoleManager = new UserRoleManager(settings.guildID)
             const promises: Promise<void>[] = []
