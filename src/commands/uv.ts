@@ -1,8 +1,7 @@
 import {
     ApplicationCommandData,
     AutocompleteInteraction,
-    CommandInteraction,
-    User
+    CommandInteraction
 } from "discord.js"
 import { PrismaClient } from "@prisma/client"
 import { Lang } from "../classes/Locale"
@@ -69,7 +68,8 @@ const data: ApplicationCommandData = {
                     name: "code",
                     description: "Code of the UV",
                     type: "STRING",
-                    required: true
+                    required: true,
+                    autocomplete: true
                 }
             ]
         },
@@ -121,7 +121,7 @@ async function run(interaction: CommandInteraction): Promise<void> {
             }
             name = interaction.options.getString("name", true)
             code = interaction.options.getString("code", true).toUpperCase()
-            if (!code.match(/^[A-Z]{2}[0-9A-Z]{2}$/)) {
+            if (!code.match(UV.regex)) {
                 interaction.followUp(Lang.get("uv.error.code", "fr"))
                 return
             }
@@ -148,7 +148,7 @@ async function run(interaction: CommandInteraction): Promise<void> {
                 return
             }
             code = interaction.options.getString("code", true).toUpperCase()
-            if (!code.match(/^[A-Z]{2}[0-9A-Z]{2}$/)) {
+            if (!code.match(UV.regex)) {
                 interaction.followUp(Lang.get("uv.error.code", "fr"))
                 return
             }
@@ -199,7 +199,7 @@ async function run(interaction: CommandInteraction): Promise<void> {
 
         case "members":
             code = interaction.options.getString("code", true).toUpperCase()
-            if (!code.match(/^[A-Z]{2}[0-9A-Z]{2}$/)) {
+            if (!code.match(UV.regex)) {
                 interaction.followUp(Lang.get("uv.error.code", "fr"))
                 return
             }
@@ -230,7 +230,7 @@ async function run(interaction: CommandInteraction): Promise<void> {
 
         case "join":
             code = interaction.options.getString("code", true).toUpperCase()
-            if (!code.match(/^[A-Z]{2}[0-9A-Z]{2}$/)) {
+            if (!code.match(UV.regex)) {
                 interaction.followUp(Lang.get("uv.error.code", "fr"))
                 return
             }
@@ -258,7 +258,7 @@ async function run(interaction: CommandInteraction): Promise<void> {
             break
         case "leave":
             code = interaction.options.getString("code", true).toUpperCase()
-            if (!code.match(/^[A-Z]{2}[0-9A-Z]{2}$/)) {
+            if (!code.match(UV.regex)) {
                 interaction.followUp(Lang.get("uv.error.code", "fr"))
                 return
             }
@@ -330,6 +330,23 @@ async function autocomplete(
             break
         case "remove":
             console.log("remove")
+            interaction.respond(
+                (await prisma.uV.findMany())
+                    .filter((uv) =>
+                        uv.id.startsWith(
+                            interaction.options
+                                .getString("code", true)
+                                .toUpperCase()
+                        )
+                    )
+                    .map((uv) => ({
+                        name: `${uv.id} : ${uv.name}`,
+                        value: uv.id
+                    }))
+            )
+            break
+
+        case "members":
             interaction.respond(
                 (await prisma.uV.findMany())
                     .filter((uv) =>

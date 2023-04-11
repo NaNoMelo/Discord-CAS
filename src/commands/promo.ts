@@ -51,7 +51,13 @@ async function run(interaction: CommandInteraction): Promise<void> {
             user.promo = promo
             await user.save()
             if (interaction.inGuild()) {
-                new UserRoleManager(interaction.guildId).applyPromoRoles(interaction.guild?.members.cache.get(interaction.user.id))
+                new UserRoleManager(interaction.guildId)
+                    .applyPromoRoles(
+                        interaction.guild?.members.cache.get(
+                            interaction.user.id
+                        )
+                    )
+                    .catch(() => {})
             }
             interaction.followUp(
                 Lang.get("promo.set", "fr", {
@@ -65,11 +71,7 @@ async function run(interaction: CommandInteraction): Promise<void> {
                 Lang.get("promo.members", Lang.defaultLang, {
                     promo: promo,
                     list: await prisma.profile
-                        .findMany({
-                            where: {
-                                promo: promo
-                            }
-                        })
+                        .findMany({ where: { promo: promo } })
                         .then((members) =>
                             members
                                 .map(

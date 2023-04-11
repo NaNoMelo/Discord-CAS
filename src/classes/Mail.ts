@@ -11,7 +11,7 @@ export class CasMail implements SendMailOptions {
 		this.from = `"Discord CAS" <${process.env.mailUser}>`
 		this.to = toAdress
 		this.subject = "Discord mail authentication"
-		this.text = `hello world ! ${token}`
+		this.text = `Votre code d'authentification est : ${token}\nUtilisez la commande /verify avec votre code pour valider votre authentification.\n Ce code est valide pendant 10 minutes.`
 	}
 }
 

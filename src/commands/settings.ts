@@ -1,8 +1,4 @@
-import {
-    ApplicationCommandData,
-    CommandInteraction,
-    Role
-} from "discord.js"
+import { ApplicationCommandData, CommandInteraction, Role } from "discord.js"
 import { Lang } from "../classes/Locale"
 import { Profile } from "../classes/Profile"
 import { Settings } from "../classes/Settings"
@@ -105,7 +101,11 @@ async function run(interaction: CommandInteraction): Promise<void> {
     )
     if (!user) return
 
-    if (!(await interaction.guild?.members.fetch(interaction.user.id))?.permissions.has("ADMINISTRATOR")) {
+    if (
+        !(
+            await interaction.guild?.members.fetch(interaction.user.id)
+        )?.permissions.has("ADMINISTRATOR")
+    ) {
         interaction.followUp(Lang.get("error.permission", Lang.defaultLang))
         return
     }
@@ -113,12 +113,12 @@ async function run(interaction: CommandInteraction): Promise<void> {
     const settings: Settings = await Settings.get(interaction.guildId).catch(
         () => Settings.create(interaction.guildId)
     )
-    let role: Role | null
+    let role: Role | null | undefined
     switch (interaction.options.getSubcommand()) {
         case "verified-role":
             role = await interaction.guild?.roles.fetch(
                 interaction.options.getRole("role", true).id
-            )!
+            )
             if (!role) return
             settings.verifiedRole = role.id
             interaction.followUp(
@@ -132,7 +132,7 @@ async function run(interaction: CommandInteraction): Promise<void> {
             const promo = interaction.options.getNumber("promo", true)
             role = await interaction.guild?.roles.fetch(
                 interaction.options.getRole("role", true).id
-            )!
+            )
             if (!role) return
             await settings.addPromoRole(role.id, promo)
             interaction.followUp(
@@ -144,8 +144,8 @@ async function run(interaction: CommandInteraction): Promise<void> {
             break
 
         case "uv-role":
-            const code = interaction.options.getString("uv", true)
-            if (!code.match(/^[A-Z]{2}[0-9A-Z]{2}$/)) {
+            const code = interaction.options.getString("uv", true).toUpperCase()
+            if (!code.match(UV.regex)) {
                 interaction.followUp(Lang.get("uv.error.code", "fr"))
                 return
             }
@@ -156,7 +156,7 @@ async function run(interaction: CommandInteraction): Promise<void> {
             if (!uv) return
             role = await interaction.guild?.roles.fetch(
                 interaction.options.getRole("role", true).id
-            )!
+            )
             if (!role) return
             await settings.addUvRole(role.id, uv.id)
             interaction.followUp(
@@ -166,6 +166,7 @@ async function run(interaction: CommandInteraction): Promise<void> {
                 })
             )
             break
+
         case "nickname":
             const format = interaction.options.getString("format", true)
             settings.nicknameFormat = format
@@ -194,7 +195,6 @@ async function run(interaction: CommandInteraction): Promise<void> {
                         Lang.get("settings.roles.error", Lang.defaultLang)
                     )
                 })
-
             break
     }
 

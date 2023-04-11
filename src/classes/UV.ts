@@ -2,6 +2,7 @@ import { PrismaClient, UV as PrismaUV } from "@prisma/client"
 const prisma = new PrismaClient()
 
 export class UV {
+    static regex = /^[A-Z]{2}[0-9A-Z]{1,2}$/
     constructor(private prismaUV: PrismaUV) {}
 
     static async get(uvName: string): Promise<UV> {
